@@ -8,13 +8,13 @@ A private, invite-only web app (installable as a PWA) where each **Member** keep
 
 ## Stack
 
-| Layer | Choice |
-|---|---|
-| Frontend | Next.js (App Router, TypeScript), Tailwind, shadcn/ui — hosted on Vercel Hobby |
-| Backend | FastAPI, SQLModel, Alembic, `uv` — hosted on Render free tier |
+| Layer           | Choice                                                                                                |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| Frontend        | Next.js (App Router, TypeScript), Tailwind, shadcn/ui — hosted on Vercel Hobby                        |
+| Backend         | FastAPI, SQLModel, Alembic, `uv` — hosted on Render free tier                                         |
 | Database & auth | Supabase free tier (Postgres + Supabase Auth). Two projects: `care-index-dev` and `care-index` (prod) |
-| Sign-in | Google OAuth; magic link as fallback |
-| CI | GitHub Actions: lint + tests on push; keep-alive ping every 3 days |
+| Sign-in         | Google OAuth; magic link as fallback                                                                  |
+| CI              | GitHub Actions: lint + tests on push; keep-alive ping every 3 days                                    |
 
 Repo layout: `frontend/`, `backend/`, `docs/`.
 
@@ -69,12 +69,12 @@ shares           id, owner_id (fk members), recipient_id (fk members),
 
 ### Authorization (per resource category: Doctors, Insurance)
 
-| Actor | Read | Create | Update | Delete |
-|---|---|---|---|---|
-| Owner | ✅ | ✅ | ✅ | ✅ |
-| Recipient with `edit` | ✅ | ✅ (owned by the Owner) | ✅ | ❌ |
-| Recipient with `view` | ✅ | ❌ | ❌ | ❌ |
-| Anyone else | ❌ | ❌ | ❌ | ❌ |
+| Actor                 | Read | Create                  | Update | Delete |
+| --------------------- | ---- | ----------------------- | ------ | ------ |
+| Owner                 | ✅   | ✅                      | ✅     | ✅     |
+| Recipient with `edit` | ✅   | ✅ (owned by the Owner) | ✅     | ❌     |
+| Recipient with `view` | ✅   | ❌                      | ❌     | ❌     |
+| Anyone else           | ❌   | ❌                      | ❌     | ❌     |
 
 - Custom Specialties follow the **Doctors** level: Editors can create them (they belong to the card's Owner), but only the Owner can delete them.
 - If the actor can't read a resource, respond `404`, not `403`, so its existence isn't revealed.
