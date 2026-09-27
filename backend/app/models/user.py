@@ -19,7 +19,7 @@ class User(Base):
     )
 
     # supabase auth alraedy creates unique id when user authenticates (auth.users.id)
-    id: Mapped[str] = mapped_column(ForeignKey("auth.users.id"), primary_key=True)
+    id: Mapped[str] = mapped_column(String(254), ForeignKey("auth.users.id"), primary_key=True)
     email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
     age: Mapped[int] = mapped_column(nullable=False)
     gender: Mapped[Gender] = mapped_column(
