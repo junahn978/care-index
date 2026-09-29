@@ -1,0 +1,3 @@
+# create doctor card
+def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: str):
+    ...
