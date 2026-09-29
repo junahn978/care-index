@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from backend.app.models.doctor_card import DoctorCards, Base
+from backend.app.models.doctor_card import DoctorCard, Base
 
 import os
 from dotenv import load_dotenv

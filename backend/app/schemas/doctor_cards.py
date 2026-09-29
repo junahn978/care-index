@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 #schema for doctor-Cards base share field
 class DoctorCardBase(BaseModel):
+    #strips all white space and strict type checking
     model_config = ConfigDict(str_strip_whitespace=True, strict=True)
 
     doctor_name: str = Field(min_length=1, max_length=100)
