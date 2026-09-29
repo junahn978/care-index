@@ -15,7 +15,7 @@ class AddressMixin:
     country: Mapped[str] = mapped_column(String(50))
 
 class DoctorCards(Base, AddressMixin):
-    __tablename__ = "doctor_cards"
+    __tablename__ = "doctor_card"
 
     __table_args__ = (
         #Checking the string attributes of DoctorCarrds are not empty after trimming whitespace
