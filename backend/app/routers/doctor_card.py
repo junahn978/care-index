@@ -1,8 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from backend.app.db import get_db
 from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardResponse
-from backend.app.models.doctor_card import DoctorCard
-from backend.app.services import create_doctor_card
-
+from backend.app.services.doctor_card import create_doctor_card
 
 #craete an instance of the APIrouter
 router = APIRouter(
@@ -17,7 +17,8 @@ router = APIRouter(
     status_code=201,
     summary="Create a new Doctor Card",
 )
-def post_doctor_card(db: session, card: DoctorCardCreate):
-    response = create_doctor_card(db, card)
+def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
+    user_id = "test-user-id"
+    response = create_doctor_card(db, card, user_id)
     return response
     
