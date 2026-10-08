@@ -21,3 +21,13 @@ def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
     user_id = "test-user-id"
     response = create_doctor_card(db, card, user_id)
     return response
+
+@router.get(
+    "/{card_id}",
+    response_model=DoctorCardResponse,
+    status_code=200,
+    summary="Get Doctor Card information"
+)
+def get_doctor_card(card_id: int, db:Session = depends(get_db)):
+    resposne = get_doctor_card()
+    return response
