@@ -18,8 +18,8 @@ def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: str) -> 
     return new_card
 
 # get doctor card by card_id
-def get_doctor_card(db: Seesion, card_id: int, user_id: str):
+def retrieve_doctor_card(db: Session, card_id: int, user_id: str) -> DoctorCard:
     query = select(DoctorCard).where(DoctorCard.card_id == card_id)
     result = db.execute(query)
-    response = result.scalars().all()
+    response = result.scalar_one_or_none()
     return response
