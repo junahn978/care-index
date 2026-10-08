@@ -33,3 +33,15 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
     user_id = "test-user-id"
     response = retrieve_doctor_card(db, card_id, user_id)
     return response
+
+# update exsisting doctor card
+@router.patch(
+    "/{card_id}",
+    response_model=DoctorCardResponse,
+    status_code=200,
+    summary="Update Doctor Card Information"
+)
+def update_doctor_card(card_id: int, db:Session = Depends(get_db)):
+    user_id = "test-user-id"
+    response
+    return response
