@@ -25,3 +25,18 @@ def retrieve_doctor_card(db: Session, card_id: int, user_id: str) -> DoctorCard:
     response = result.scalar_one_or_none()
     
     return response
+
+def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate) -> DoctorCard | None:
+    # fetch exsisting matching card_id
+    card = db.get(DoctorCard, card_id)
+
+    #extract only the fields user changed
+    update_data = card_update.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(card, field, value)
+
+    db.commit()
+    db.refresh(card)
+
+    return card

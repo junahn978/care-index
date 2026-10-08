@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from backend.app.db import get_db
-from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardResponse
-from backend.app.services.doctor_card import create_doctor_card, retrieve_doctor_card
+from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardResponse, DoctorCardUpdate
+from backend.app.services.doctor_card import create_doctor_card, retrieve_doctor_card, update_doctor_card
 
 #craete an instance of the APIrouter
 router = APIRouter(
@@ -41,7 +41,7 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
     status_code=200,
     summary="Update Doctor Card Information"
 )
-def update_doctor_card(card_id: int, db:Session = Depends(get_db)):
+def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends(get_db)):
     user_id = "test-user-id"
-    response
+    response = update_doctor_card(card_id, )
     return response
