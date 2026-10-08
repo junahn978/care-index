@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from backend.app.schemas.doctor_cards import DoctorCardCreate
+from sqlalchemy import select
+from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardUpdate
 from backend.app.models.doctor_card import DoctorCard
 
 # create doctor card
@@ -15,3 +16,10 @@ def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: str) -> 
     db.refresh(new_card)
 
     return new_card
+
+# get doctor card by card_id
+def get_doctor_card(db: Seesion, card_id: int, user_id: str):
+    query = select(DoctorCard).where(DoctorCard.card_id == card_id)
+    result = db.execute(query)
+    response = result.scalars().all()
+    return response
