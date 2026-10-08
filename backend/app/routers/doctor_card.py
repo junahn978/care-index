@@ -43,5 +43,5 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
 )
 def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends(get_db)):
     user_id = "test-user-id"
-    response = update_doctor_card(card_id, )
+    response = update_doctor_card(db, card_id, card)
     return response
