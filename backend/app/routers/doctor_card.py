@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.app.db import get_db
 from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardResponse, DoctorCardUpdate
 from backend.app.services.doctor_card import create_doctor_card, retrieve_doctor_card, update_doctor_card, remove_doctor_card
+import uuid
+from uuid import UUID 
 
 #craete an instance of the APIrouter
 router = APIRouter(
@@ -32,7 +34,10 @@ def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
 def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
     user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
     response = retrieve_doctor_card(db, card_id, user_id)
-    return response
+    
+    if response is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"card ID: {card_id} not found")
+    else: return response
 
 # update exsisting doctor card
 @router.patch(

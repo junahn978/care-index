@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 import uuid
+from uuid import UUID 
 
 #schema for doctor-Cards base share field
 class DoctorCardBase(BaseModel):
@@ -38,7 +39,7 @@ class DoctorCardUpdate(DoctorCardBase):
 
 #schema for output response
 class DoctorCardResponse(DoctorCardBase):
-    user_id: uuid = uuid.UUID
+    user_id: UUID
     card_id: int
     created_at: datetime
     updated_at: datetime
