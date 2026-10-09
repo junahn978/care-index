@@ -26,7 +26,7 @@ def retrieve_doctor_card(db: Session, card_id: int, user_id: str) -> DoctorCard:
     
     return response
 
-def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate) -> DoctorCard | None:
+def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate, user_id) -> DoctorCard | None:
     # fetch exsisting matching card_id
     card = db.get(DoctorCard, card_id)
 
@@ -40,3 +40,10 @@ def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate)
     db.refresh(card)
 
     return card
+
+
+def remove_doctor_card(db:Session, card_id:int, user_id:str):
+    doctor_card = db.get(DoctorCard, card_id)
+    if doctor_card:
+        db.delete(doctor_card)
+        db.commit()

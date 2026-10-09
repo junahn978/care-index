@@ -53,3 +53,5 @@ class DoctorCard(Base, AddressMixin):
         server_default=func.now(),
         onupdate=func.now()
     )
+
+    
