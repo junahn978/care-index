@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from backend.app.schemas.doctor_cards import DoctorCardCreate
+from sqlalchemy import select
+from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardUpdate
 from backend.app.models.doctor_card import DoctorCard
 
 # create doctor card
@@ -15,3 +16,34 @@ def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: str) -> 
     db.refresh(new_card)
 
     return new_card
+
+# get doctor card by card_id
+def retrieve_doctor_card(db: Session, card_id: int, user_id: str) -> DoctorCard:
+    
+    query = select(DoctorCard).where(DoctorCard.card_id == card_id)
+    result = db.execute(query)
+    response = result.scalar_one_or_none()
+    
+    return response
+
+def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate, user_id) -> DoctorCard | None:
+    # fetch exsisting matching card_id
+    card = db.get(DoctorCard, card_id)
+
+    #extract only the fields user changed
+    update_data = card_update.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(card, field, value)
+
+    db.commit()
+    db.refresh(card)
+
+    return card
+
+
+def remove_doctor_card(db:Session, card_id:int, user_id:str):
+    doctor_card = db.get(DoctorCard, card_id)
+    if doctor_card:
+        db.delete(doctor_card)
+        db.commit()
