@@ -18,7 +18,7 @@ router = APIRouter(
     summary="Create a new Doctor Card",
 )
 def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
-    user_id = "test-user-id"
+    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
     response = create_doctor_card(db, card, user_id)
     return response
 
@@ -30,7 +30,7 @@ def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
     summary="Get Doctor Card information"
 )
 def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
-    user_id = "test-user-id"
+    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
     response = retrieve_doctor_card(db, card_id, user_id)
     return response
 
@@ -42,7 +42,7 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
     summary="Update Doctor Card Information"
 )
 def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends(get_db)):
-    user_id = "test-user-id"
+    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
     response = update_doctor_card(db, card_id, card, user_id)
     return response
 
@@ -53,6 +53,6 @@ def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends
     summary="Delete doctor card"
 )
 def delete_doctor_card(card_id: int, db: Session = Depends(get_db)):
-    user_id = "test-user-id"
+    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
     remove_doctor_card(db, card_id, user_id)
     return {"message": "Successfully deleted"}

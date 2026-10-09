@@ -1,7 +1,8 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import CheckConstraint, func, DateTime, String, ForeignKey
+from sqlalchemy import CheckConstraint, func, DateTime, String, ForeignKey, Uuid
 from datetime import datetime
 from typing import Optional
+import uuid
 
 class Base(DeclarativeBase):
     pass
@@ -36,7 +37,7 @@ class DoctorCard(Base, AddressMixin):
     )
 
     card_id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[Optional[str]] = mapped_column(String(36))
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     doctor_name: Mapped[str] = mapped_column(String(100))
     specialty: Mapped[str] = mapped_column(String(100))
     clinic_name: Mapped[Optional[str]] = mapped_column(String(255))
@@ -54,4 +55,3 @@ class DoctorCard(Base, AddressMixin):
         onupdate=func.now()
     )
 
-    
