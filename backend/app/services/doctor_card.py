@@ -31,6 +31,10 @@ def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate,
     # fetch exsisting matching card_id
     card = db.get(DoctorCard, card_id)
 
+    # card does not exsist, return none, exit early
+    if card is None: 
+        return None
+    
     #extract only the fields user changed
     update_data = card_update.model_dump(exclude_unset=True)
 

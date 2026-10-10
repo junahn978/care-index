@@ -49,7 +49,10 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
 def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends(get_db)):
     user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
     response = update_doctor_card(db, card_id, card, user_id)
-    return response
+    
+    if response is None: 
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"card ID: {card_id} not found")
+    else: return response
 
 # delete doctor card
 @router.delete(
