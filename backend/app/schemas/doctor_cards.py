@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 import uuid
-from uuid import UUID 
+from uuid import UUID
 
 #schema for doctor-Cards base share field
 class DoctorCardBase(BaseModel):

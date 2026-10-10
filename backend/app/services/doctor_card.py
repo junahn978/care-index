@@ -42,7 +42,6 @@ def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate,
 
     return card
 
-
 def remove_doctor_card(db:Session, card_id:int, user_id:UUID)-> bool:
     
     doctor_card = db.get(DoctorCard, card_id)
