@@ -31,7 +31,7 @@ def retrieve_doctor_card(db: Session, card_id: int, user_id: UUID) -> DoctorCard
 def retrieve_all_doctor_card(db: Session, user_id:UUID) -> list[DoctorCard]:
     statement = select(DoctorCard).where(DoctorCard.user_id == user_id)
     response = db.scalars(statement).all()
-    return statement
+    return list(response)
 
 def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate, user_id:UUID) -> DoctorCard | None:
     # fetch exsisting matching card_id

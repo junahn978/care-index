@@ -34,7 +34,7 @@ def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
     summary="Get Doctor Card information"
 )
 def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
-    user_id = umock_user_id
+    user_id = mock_user_id
     response = retrieve_doctor_card(db, card_id, user_id)
     
     if response is None:
@@ -48,7 +48,7 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
     status_code=200,
     summary="get all doctor card for a given user"
 )
-def get_all_doctor_card(user_id: UUID, db:Session = Depends(get_db)):
+def get_all_doctor_card(db:Session = Depends(get_db)):
     user_id = mock_user_id
     response = retrieve_all_doctor_card(db, user_id)
 
