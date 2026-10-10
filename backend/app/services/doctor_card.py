@@ -2,9 +2,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardUpdate
 from backend.app.models.doctor_card import DoctorCard
+from uuid import UUID 
 
 # create doctor card
-def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: str) -> DoctorCard:
+def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: UUID) -> DoctorCard:
     # turn the card_in python object to a standard dictionary
     card_data = card_in.model_dump()
     
@@ -18,7 +19,7 @@ def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: str) -> 
     return new_card
 
 # get doctor card by card_id
-def retrieve_doctor_card(db: Session, card_id: int, user_id: str) -> DoctorCard:
+def retrieve_doctor_card(db: Session, card_id: int, user_id: UUID) -> DoctorCard | None:
     
     query = select(DoctorCard).where(DoctorCard.card_id == card_id)
     result = db.execute(query)
@@ -26,10 +27,20 @@ def retrieve_doctor_card(db: Session, card_id: int, user_id: str) -> DoctorCard:
     
     return response
 
-def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate, user_id) -> DoctorCard | None:
+#retrive all doctor cards for a given user_id 
+def retrieve_all_doctor_card(db: Session, user_id:UUID) -> list[DoctorCard]:
+    statement = select(DoctorCard).where(DoctorCard.user_id == user_id)
+    response = db.scalars(statement).all()
+    return list(response)
+
+def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate, user_id:UUID) -> DoctorCard | None:
     # fetch exsisting matching card_id
     card = db.get(DoctorCard, card_id)
 
+    # card does not exsist, return none, exit early
+    if card is None: 
+        return None
+    
     #extract only the fields user changed
     update_data = card_update.model_dump(exclude_unset=True)
 
@@ -41,9 +52,14 @@ def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate,
 
     return card
 
-
-def remove_doctor_card(db:Session, card_id:int, user_id:str):
+def remove_doctor_card(db:Session, card_id:int, user_id:UUID)-> bool:
+    
     doctor_card = db.get(DoctorCard, card_id)
+
     if doctor_card:
         db.delete(doctor_card)
         db.commit()
+        return True
+    else: return False
+    
+    

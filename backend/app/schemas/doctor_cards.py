@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 import uuid
+from uuid import UUID
 
 #schema for doctor-Cards base share field
 class DoctorCardBase(BaseModel):
@@ -23,6 +24,14 @@ class DoctorCardBase(BaseModel):
     zip_code: Optional[str] = Field(None, max_length=20)
     country: str = Field(min_length=1, max_length=50)
 
+    # validator for empty optional fields to turn into None
+    @field_validator("clinic_name", "phone", "website", "notes", "street_address_2", "zip_code")
+    @classmethod
+    def empty_strings_to_none(cls, value) -> str | None:
+        if value == "":
+            value = None
+        return value
+
 #schema for POST (creating new card)
 class DoctorCardCreate(DoctorCardBase):
     pass
@@ -38,7 +47,7 @@ class DoctorCardUpdate(DoctorCardBase):
 
 #schema for output response
 class DoctorCardResponse(DoctorCardBase):
-    user_id: uuid = uuid.UUID
+    user_id: UUID
     card_id: int
     created_at: datetime
     updated_at: datetime
