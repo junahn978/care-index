@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.app.db import get_db
 from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardResponse, DoctorCardUpdate
-from backend.app.services.doctor_card import create_doctor_card, retrieve_doctor_card, update_doctor_card, remove_doctor_card
+from backend.app.services.doctor_card import create_doctor_card, retrieve_doctor_card, update_doctor_card, remove_doctor_card, retrieve_all_doctor_card
 import uuid
 from uuid import UUID 
+
+mock_user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
 
 #craete an instance of the APIrouter
 router = APIRouter(
@@ -20,7 +22,7 @@ router = APIRouter(
     summary="Create a new Doctor Card",
 )
 def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
-    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
+    user_id = mock_user_id
     response = create_doctor_card(db, card, user_id)
     return response
 
@@ -32,12 +34,26 @@ def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
     summary="Get Doctor Card information"
 )
 def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
-    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
+    user_id = umock_user_id
     response = retrieve_doctor_card(db, card_id, user_id)
     
     if response is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"card ID: {card_id} not found")
     else: return response
+
+# get all doctor cards for an user
+@router.get(
+    "/",
+    response_model=list[DoctorCardResponse],
+    status_code=200,
+    summary="get all doctor card for a given user"
+)
+def get_all_doctor_card(user_id: UUID, db:Session = Depends(get_db)):
+    user_id = mock_user_id
+    response = retrieve_all_doctor_card(db, user_id)
+
+    return response
+
 
 # update exsisting doctor card
 @router.patch(
@@ -47,7 +63,7 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
     summary="Update Doctor Card Information"
 )
 def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends(get_db)):
-    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
+    user_id = mock_user_id
     response = update_doctor_card(db, card_id, card, user_id)
     
     if response is None: 
@@ -61,7 +77,7 @@ def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends
     summary="Delete doctor card"
 )
 def delete_doctor_card(card_id: int, db: Session = Depends(get_db)):
-    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
+    user_id = mock_user_id
     response = remove_doctor_card(db, card_id, user_id)
 
     if not response: 
