@@ -19,7 +19,7 @@ class DoctorCard(Base, AddressMixin):
     __tablename__ = "doctor_card"
 
     __table_args__ = (
-        #Checking the string attributes of DoctorCarrds are not empty after trimming whitespace
+        #Checking the string attributes of DoctorCarrds are not empty after trimming whitespace. Lets through valid str length and null
         CheckConstraint("char_length(trim(doctor_name)) >= 1", name="check_doctor_name_not_empty"),
         CheckConstraint("char_length(trim(specialty)) >= 1", name="check_specialty_not_empty"),
         CheckConstraint("char_length(trim(clinic_name)) >= 1",name= "check_clinic_name_not_empty"),

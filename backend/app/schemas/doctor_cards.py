@@ -24,6 +24,14 @@ class DoctorCardBase(BaseModel):
     zip_code: Optional[str] = Field(None, max_length=20)
     country: str = Field(min_length=1, max_length=50)
 
+    # validator for empty optional fields to turn into None
+    @field_validator("clinic_name", "phone", "website", "notes", "street_address_2", "zip_code")
+    @classmethod
+    def empty_strings_to_none(cls, value) -> str | None:
+        if value == "":
+            value = None
+        return value
+
 #schema for POST (creating new card)
 class DoctorCardCreate(DoctorCardBase):
     pass
