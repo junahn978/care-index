@@ -59,5 +59,9 @@ def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends
 )
 def delete_doctor_card(card_id: int, db: Session = Depends(get_db)):
     user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
-    remove_doctor_card(db, card_id, user_id)
-    return {"message": "Successfully deleted"}
+    response = remove_doctor_card(db, card_id, user_id)
+
+    if not response: 
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"card ID: {card_id} not found")
+    
+    
