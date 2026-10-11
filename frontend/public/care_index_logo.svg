@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg-icon { fill: #0d9488; }
+      .cross-mark { fill: #ffffff; }
+      .degree-dot { fill: #38bdf8; }
+      .text-care { fill: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 68px; }
+      .text-dash { fill: #0d9488; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 68px; }
+      .text-index { fill: #0d9488; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 68px; }
+    </style>
+  </defs>
+
+  <!-- App Icon / Badge -->
+  <rect x="10" y="10" width="140" height="140" rx="38" class="bg-icon" />
+
+  <!-- Plus / Cross Symbol -->
+  <path class="cross-mark" d="M 80 42 C 84.4 42 88 45.6 88 50 L 88 72 L 110 72 C 114.4 72 118 75.6 118 80 C 118 84.4 114.4 88 110 88 L 88 88 L 88 110 C 88 114.4 84.4 118 80 118 C 75.6 118 72 114.4 72 110 L 72 88 L 50 88 C 45.6 88 42 84.4 42 80 C 42 75.6 45.6 72 50 72 L 72 72 L 72 50 C 72 45.6 75.6 42 80 42 Z" />
+
+  <!-- Blue Degree Dot -->
+  <circle cx="106" cy="52" r="11" class="degree-dot" />
+
+  <!-- Logotype Text -->
+  <g transform="translate(175, 104)">
+    <text class="text-care" x="0" y="0">Care</text>
+    <text class="text-dash" x="145" y="0">-</text>
+    <text class="text-index" x="175" y="0">Index</text>
+  </g>
+</svg>
