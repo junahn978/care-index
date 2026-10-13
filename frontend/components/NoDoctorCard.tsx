@@ -1,5 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { BriefcaseMedical } from "lucide-react";
+import { useState } from "react";
+import AddDoctorCard from "./AddDoctorCard";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function NoDoctorCards() {
   return (
@@ -10,7 +15,21 @@ export default function NoDoctorCards() {
         You haven’t added any healthcare providers to your Care-Index directory
         yet.
       </h2>
-      <Button className="bg-[#008378] mt-3 mb-8">Add Doctor</Button>
+
+      <Dialog>
+        <form>
+          <DialogTrigger
+            render={
+              <Button className="bg-[#008378] mt-3 mb-8" variant="outline">
+                Add Doctor
+              </Button>
+            }
+          />
+          <DialogContent className="sm:max-w-sm">
+            <AddDoctorCard></AddDoctorCard>
+          </DialogContent>
+        </form>
+      </Dialog>
     </div>
   );
 }

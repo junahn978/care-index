@@ -30,7 +30,7 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 
-// zod schema for client input validation
+// defining the zod schema for client input validation
 const formSchema = z.object({
   doctorName: z
     .string()
@@ -82,12 +82,11 @@ const formSchema = z.object({
     .max(1000, "Notes cannot be longer than 1000 characters"),
 });
 
-//component
 export default function AddDoctorCard() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      doctorName: "",
+      doctorName: "doctorName",
       specialty: "",
       clinicName: "",
       phone: "",
@@ -102,6 +101,7 @@ export default function AddDoctorCard() {
     },
   });
 
+  // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   function onSubmit(data: z.infer<typeof formSchema>) {
     toast("You submitted the following values:", {
       description: (
@@ -131,7 +131,7 @@ export default function AddDoctorCard() {
         <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <Controller
-              name="title"
+              name="doctorName"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
@@ -152,7 +152,7 @@ export default function AddDoctorCard() {
               )}
             />
             <Controller
-              name="description"
+              name="specialty"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
