@@ -82,12 +82,23 @@ const formSchema = z.object({
     .max(1000, "Notes cannot be longer than 1000 characters"),
 });
 
+//component
 export default function AddDoctorCard() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      doctorName: "",
+      specialty: "",
+      clinicName: "",
+      phone: "",
+      website: "",
+      streetAddress1: "",
+      streetAddress2: "",
+      city: "",
+      stateProvince: "",
+      zipCode: "",
+      country: "",
+      notes: "",
     },
   });
 
