@@ -25,7 +25,7 @@ export default function NoDoctorCards() {
               </Button>
             }
           />
-          <DialogContent className="sm:max-w-sm">
+          <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
             <AddDoctorCard></AddDoctorCard>
           </DialogContent>
         </form>
