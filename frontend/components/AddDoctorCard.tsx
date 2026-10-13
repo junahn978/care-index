@@ -43,8 +43,8 @@ const formSchema = z.object({
   clinicName: z
     .string()
     .trim()
-    .max(100, "Clinic name cannot be longer than 255 characters"),
-  phoneNumber: z
+    .max(255, "Clinic name cannot be longer than 255 characters"),
+  phone: z
     .string()
     .trim()
     .max(32, "Phone number cannot be longer than 32 characters"),
@@ -54,7 +54,7 @@ const formSchema = z.object({
     .max(255, "Website cannot be longer than 255 characters"),
   streetAddress1: z
     .string()
-    .min(1, "")
+    .min(1, "Street address 1 should be at least 1 character long")
     .max(150, "Street address 1 cannot be longer than 150 characters"),
   streetAddress2: z
     .string()
