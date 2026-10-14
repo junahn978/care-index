@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DoctorCard from "@/components/DoctorCard";
-import AddDoctorCard from "@/components/AddDoctorCard";
+import DisplayDoctorCard from "@/components/DisplayDoctorCard";
 import NoDoctorCards from "@/components/NoDoctorCard";
 import Header from "@/components/header";
 
@@ -47,9 +46,10 @@ export default function Home() {
       <Header />
       <div className="flex justify-center">
         {doctorCards.length > 0 ? (
-          doctorCards.map((doctorCard) => (
-            <DoctorCard key={doctorCard.doctorName} {...doctorCard} />
-          ))
+          <DisplayDoctorCard
+            doctorCount={doctorCards.length}
+            doctorCards={doctorCards}
+          />
         ) : (
           <NoDoctorCards />
         )}
