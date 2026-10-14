@@ -2,21 +2,7 @@ import DoctorCard from "./DoctorCard";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import AddDoctorCard from "./AddDoctorCard";
-
-type DoctorCardData = {
-  doctorName: string;
-  specialty: string;
-  clinicName: string;
-  phone: string;
-  website: string;
-  streetAddress1: string;
-  streetAddress2: string;
-  city: string;
-  stateProvince: string;
-  zipCode: string;
-  country: string;
-  notes: string;
-};
+import { DoctorCardData } from "@/lib/types";
 
 export default function DisplayDoctorCard({
   doctorCount,

@@ -4,10 +4,12 @@ import { useState } from "react";
 import DisplayDoctorCard from "@/components/DisplayDoctorCard";
 import NoDoctorCards from "@/components/NoDoctorCard";
 import Header from "@/components/header";
+import { DoctorCardData } from "@/lib/types";
 
 export default function Home() {
-  const mockDoctors = [
+  const mockDoctors: DoctorCardData[] = [
     {
+      cardId: 1,
       doctorName: "Dr. Marcus Vance, MD",
       specialty: "Cardiology / Electrophysiology",
       clinicName: "Northwest Cardio Specialists",
@@ -23,6 +25,7 @@ export default function Home() {
         "Special referral requirements, direct nurse triage line, or portal login notes...",
     },
     {
+      cardId: 1,
       doctorName: "Dr. Priya Raman, DO",
       specialty: "Endocrinology / Diabetes Care",
       clinicName: "Cascade Metabolic Health Center",
