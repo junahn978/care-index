@@ -13,3 +13,5 @@ export type DoctorCardData = {
   country: string;
   notes: string | null;
 };
+
+export type NewDoctorCardData = Omit<DoctorCardData, "cardId">;
