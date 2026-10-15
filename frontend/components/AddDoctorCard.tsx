@@ -138,7 +138,7 @@ export default function AddDoctorCard() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="form-rhf-demo-title">
-                      Doctor Name
+                      Doctor Name <span className="text-destructive">*</span>
                     </FieldLabel>
                     <Input
                       {...field}
@@ -159,7 +159,7 @@ export default function AddDoctorCard() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="form-rhf-demo-title">
-                      Specialty
+                      Specialty <span className="text-destructive">*</span>
                     </FieldLabel>
                     <Input
                       {...field}
@@ -253,7 +253,8 @@ export default function AddDoctorCard() {
                     className="col-span-full"
                   >
                     <FieldLabel htmlFor="form-rhf-demo-title">
-                      Street Address 1
+                      Street Address 1{" "}
+                      <span className="text-destructive">*</span>
                     </FieldLabel>
                     <Input
                       {...field}
@@ -297,7 +298,9 @@ export default function AddDoctorCard() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="form-rhf-demo-title">City</FieldLabel>
+                    <FieldLabel htmlFor="form-rhf-demo-title">
+                      City <span className="text-destructive">*</span>
+                    </FieldLabel>
                     <Input
                       {...field}
                       id="form-rhf-demo-title"
@@ -316,7 +319,7 @@ export default function AddDoctorCard() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="form-rhf-demo-title">
-                      State/Province
+                      State/Province <span className="text-destructive">*</span>
                     </FieldLabel>
                     <Input
                       {...field}
@@ -356,7 +359,7 @@ export default function AddDoctorCard() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="form-rhf-demo-title">
-                      Country
+                      Country <span className="text-destructive">*</span>
                     </FieldLabel>
                     <Input
                       {...field}

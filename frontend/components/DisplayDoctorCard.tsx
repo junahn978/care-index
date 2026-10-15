@@ -13,15 +13,13 @@ export default function DisplayDoctorCard({
 }) {
   return (
     <div>
-      <div className="flex">
-        My Care Team | {doctorCount} Doctors
+      <div className="flex justify-between">
+        <div>My Care Team | {doctorCount} Doctors</div>
         <Dialog>
           <form>
             <DialogTrigger
               render={
-                <Button className="bg-[#008378] mt-3 mb-8" variant="outline">
-                  Add Doctor
-                </Button>
+                <Button className="bg-[#008378] mt-3 mb-8 ">Add Doctor</Button>
               }
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
@@ -30,10 +28,11 @@ export default function DisplayDoctorCard({
           </form>
         </Dialog>
       </div>
-
-      {doctorCards.map((doctorCards) => (
-        <DoctorCard key={doctorCards.doctorName} {...doctorCards} />
-      ))}
+      <div className="grid grid-cols-2 gap-5">
+        {doctorCards.map((doctorCards) => (
+          <DoctorCard key={doctorCards.doctorName} {...doctorCards} />
+        ))}
+      </div>
     </div>
   );
 }
