@@ -2,6 +2,7 @@ import { MapPin, Phone, Globe, FileText, User } from "lucide-react";
 import { DoctorCardData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { deleteDoctorCard } from "@/lib/api/doctor-cards";
 
 export default function DoctorCard({
   cardId,
@@ -50,7 +51,12 @@ export default function DoctorCard({
         </div>
       </div>
       <div className="flex justify-between">
-        <Button className="bg-[#008378]">Remove</Button>
+        <Button
+          className="bg-[#008378]"
+          onClick={() => deleteDoctorCard(cardId)}
+        >
+          Remove
+        </Button>
         <Dialog>
           <form>
             <DialogTrigger
