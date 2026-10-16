@@ -1,9 +1,25 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { ChevronDown } from "lucide-react";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -83,6 +99,8 @@ const formSchema = z.object({
 });
 
 export default function AddDoctorCard() {
+  const [country, setCountry] = useState("United States");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -353,26 +371,34 @@ export default function AddDoctorCard() {
                   </Field>
                 )}
               />
-              <Controller
-                name="country"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="form-rhf-demo-title">
-                      Country <span className="text-destructive">*</span>
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="form-rhf-demo-title"
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+              <div>
+                <DropdownMenu>
+                  Country
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        variant="outline"
+                        className="flex justify-between"
+                      >
+                        {country} <ChevronDown />
+                      </Button>
+                    }
+                  />
+                  <DropdownMenuContent className="w-40" align="start">
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        onClick={() => setCountry("United States")}
+                      >
+                        United States
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setCountry("Canada")}>
+                        Canada
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <Controller
                 name="notes"
                 control={form.control}

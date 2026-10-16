@@ -22,7 +22,7 @@ export default function DisplayDoctorCard({
           <form>
             <DialogTrigger
               render={
-                <Button className="bg-[#008378] mt-3 mb-8 ">Add Doctor</Button>
+                <Button className="mt-3 mb-8">Add Doctor</Button>
               }
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">

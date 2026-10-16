@@ -20,7 +20,7 @@ export default function NoDoctorCards() {
         <form>
           <DialogTrigger
             render={
-              <Button className="bg-[#008378] mt-3 mb-8" variant="outline">
+              <Button className="mt-3 mb-8">
                 Add Doctor
               </Button>
             }

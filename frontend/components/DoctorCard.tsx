@@ -65,14 +65,12 @@ export default function DoctorCard({
         </div>
       </div>
       <div className="flex justify-between">
-        <Button className="bg-[#008378]" onClick={handleRemove}>
-          Remove
-        </Button>
+        <Button onClick={handleRemove}>Remove</Button>
         <Dialog>
           <form>
             <DialogTrigger
               render={
-                <Button className="bg-[#008378] mt-3 mb-8">Edit Details</Button>
+                <Button className="mt-3 mb-8">Edit Details</Button>
               }
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto"></DialogContent>
