@@ -1,6 +1,7 @@
 import { MapPin, Phone, Globe, FileText, User } from "lucide-react";
 import { DoctorCardData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Dispatch, SetStateAction } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { deleteDoctorCard } from "@/lib/api/doctor-cards";
 
@@ -18,7 +19,20 @@ export default function DoctorCard({
   zipCode,
   country,
   notes,
-}: DoctorCardData) {
+  setDoctorCards,
+}: DoctorCardData & {
+  setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
+}) {
+  async function handleRemove() {
+    await deleteDoctorCard(cardId);
+    removeDoctorCardId();
+  }
+
+  // removes the specific doctor card based on the cardId and updates the state to trigger rerender
+  function removeDoctorCardId() {
+    setDoctorCards((cards) => cards.filter((card) => card.cardId !== cardId));
+  }
+
   return (
     <div className="mb-8 border-2 border-solid p-4">
       <div className="grid grid-cols-2 gap-6 mb-7">
@@ -51,10 +65,7 @@ export default function DoctorCard({
         </div>
       </div>
       <div className="flex justify-between">
-        <Button
-          className="bg-[#008378]"
-          onClick={() => deleteDoctorCard(cardId)}
-        >
+        <Button className="bg-[#008378]" onClick={handleRemove}>
           Remove
         </Button>
         <Dialog>

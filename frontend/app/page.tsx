@@ -35,6 +35,7 @@ export default function Home() {
           <DisplayDoctorCard
             doctorCount={doctorCards.length}
             doctorCards={doctorCards}
+            setDoctorCards={setDoctorCards}
           />
         ) : (
           <NoDoctorCards />
