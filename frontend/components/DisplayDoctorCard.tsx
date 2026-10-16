@@ -21,12 +21,10 @@ export default function DisplayDoctorCard({
         <Dialog>
           <form>
             <DialogTrigger
-              render={
-                <Button className="mt-3 mb-8">Add Doctor</Button>
-              }
+              render={<Button className="mt-3 mb-8">Add Doctor</Button>}
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
-              <AddDoctorCard></AddDoctorCard>
+              <AddDoctorCard setDoctorCards={setDoctorCards}></AddDoctorCard>
             </DialogContent>
           </form>
         </Dialog>

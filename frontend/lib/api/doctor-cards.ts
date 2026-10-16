@@ -56,7 +56,6 @@ export async function getDoctorCards(): Promise<DoctorCardData[]> {
 export async function editDoctorCard() {}
 
 export async function deleteDoctorCard(card_id: number) {
-  console.log(card_id);
   const url = `${API_URL}/doctor-card/${card_id}`;
 
   const response = await fetch(url, { method: "DELETE" });
@@ -69,4 +68,17 @@ export async function deleteDoctorCard(card_id: number) {
   }
 }
 
-export async function createDoctorCard() {}
+export async function createDoctorCard(card: NewDoctorCardData) {
+  const url = `${API_URL}/doctor-card/`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(card),
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const result: ApiDoctorCardResponse = await response.json();
+  return convertToDoctorCardData(result);
+}

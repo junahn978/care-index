@@ -1,27 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Dispatch, SetStateAction } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 import * as z from "zod";
-
+import { createDoctorCard } from "@/lib/api/doctor-cards";
+import { DoctorCardData, NewDoctorCardData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -98,9 +92,11 @@ const formSchema = z.object({
     .max(1000, "Notes cannot be longer than 1000 characters"),
 });
 
-export default function AddDoctorCard() {
-  const [country, setCountry] = useState("United States");
-
+export default function AddDoctorCard({
+  setDoctorCards,
+}: {
+  setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
+}) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -120,21 +116,10 @@ export default function AddDoctorCard() {
   });
 
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
-    });
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    console.log("submitting");
+    const newCard: DoctorCardData = await createDoctorCard(data);
+    setDoctorCards((cards) => [...cards, newCard]);
   }
 
   return (
@@ -147,7 +132,12 @@ export default function AddDoctorCard() {
       </CardHeader>
       <FieldSeparator />
       <CardContent>
-        <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          id="form-rhf-demo"
+          onSubmit={form.handleSubmit(onSubmit, (errors) =>
+            console.log(errors),
+          )}
+        >
           <FieldGroup>
             <div className="grid grid-cols-2 gap-4">
               <Controller
@@ -371,34 +361,47 @@ export default function AddDoctorCard() {
                   </Field>
                 )}
               />
-              <div>
-                <DropdownMenu>
-                  Country
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        variant="outline"
-                        className="flex justify-between"
-                      >
-                        {country} <ChevronDown />
-                      </Button>
-                    }
-                  />
-                  <DropdownMenuContent className="w-40" align="start">
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem
-                        onClick={() => setCountry("United States")}
-                      >
-                        United States
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setCountry("Canada")}>
-                        Canada
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <Controller
+                name="country"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="form-rhf-demo-title">
+                      Country <span className="text-destructive">*</span>
+                    </FieldLabel>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            variant="outline"
+                            className="flex justify-between"
+                          >
+                            {field.value || "Select a country"} <ChevronDown />
+                          </Button>
+                        }
+                      />
+                      <DropdownMenuContent className="w-40" align="start">
+                        <DropdownMenuItem
+                          onClick={() => field.onChange("United States")}
+                        >
+                          United States
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => field.onChange("Canada")}
+                        >
+                          Canada
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Controller
                 name="notes"
                 control={form.control}
