@@ -18,6 +18,7 @@ export default function DisplayDoctorCard({
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
 
   return (
     <div>
@@ -32,6 +33,8 @@ export default function DisplayDoctorCard({
               <AddDoctorCard
                 setDoctorCards={setDoctorCards}
                 setIsDialogOpen={setIsDialogOpen}
+                showSpinner={showSpinner}
+                setShowSpinner={setShowSpinner}
               ></AddDoctorCard>
             </DialogContent>
           </form>
