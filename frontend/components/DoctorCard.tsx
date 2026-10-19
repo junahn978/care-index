@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dispatch, SetStateAction } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { deleteDoctorCard } from "@/lib/api/doctor-cards";
+import EditDoctorCard from "./EditDoctorCard";
 
 export default function DoctorCard({
   cardId,
@@ -20,8 +21,14 @@ export default function DoctorCard({
   country,
   notes,
   setDoctorCards,
+  setIsDialogOpen,
+  setShowSpinner,
+  showSpinner,
 }: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
+  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setShowSpinner: Dispatch<SetStateAction<boolean>>;
+  showSpinner: boolean;
 }) {
   async function handleRemove() {
     await deleteDoctorCard(cardId);
@@ -69,11 +76,16 @@ export default function DoctorCard({
         <Dialog>
           <form>
             <DialogTrigger
-              render={
-                <Button className="mt-3 mb-8">Edit Details</Button>
-              }
+              render={<Button className="mt-3 mb-8">Edit Details</Button>}
             />
-            <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto"></DialogContent>
+            <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
+              <EditDoctorCard
+                setDoctorCards={setDoctorCards}
+                setIsDialogOpen={setIsDialogOpen}
+                showSpinner={showSpinner}
+                setShowSpinner={setShowSpinner}
+              ></EditDoctorCard>
+            </DialogContent>
           </form>
         </Dialog>
       </div>
