@@ -1,4 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { BriefcaseMedical } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import AddDoctorCard from "./AddDoctorCard";
@@ -10,6 +13,8 @@ export default function NoDoctorCards({
 }: {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
 }) {
+  const [isAddDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div className="flex flex-col items-center mt-60 bg-[#ffffff] w-150">
       <BriefcaseMedical size={50} className="mt-8" color="#008378" />
@@ -25,7 +30,10 @@ export default function NoDoctorCards({
             render={<Button className="mt-3 mb-8">Add Doctor</Button>}
           />
           <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
-            <AddDoctorCard setDoctorCards={setDoctorCards}></AddDoctorCard>
+            <AddDoctorCard
+              setDoctorCards={setDoctorCards}
+              setIsDialogOpen={setIsDialogOpen}
+            ></AddDoctorCard>
           </DialogContent>
         </form>
       </Dialog>

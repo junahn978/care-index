@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dispatch, SetStateAction } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -39,6 +38,7 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
+import { Spinner } from "@/components/ui/spinner";
 
 // defining the zod schema for client input validation
 const formSchema = z.object({
@@ -94,8 +94,10 @@ const formSchema = z.object({
 
 export default function AddDoctorCard({
   setDoctorCards,
+  setIsDialogOpen,
 }: {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
+  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -117,11 +119,9 @@ export default function AddDoctorCard({
 
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log("submitting");
-    console.log(setDoctorCards);
     const newCard: DoctorCardData = await createDoctorCard(data);
-
     setDoctorCards((cards) => [...cards, newCard]);
+    setIsDialogOpen(false);
   }
 
   return (

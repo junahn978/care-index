@@ -1,6 +1,7 @@
 "use client";
 
 import DoctorCard from "./DoctorCard";
+import { useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,17 +17,22 @@ export default function DisplayDoctorCard({
   doctorCards: DoctorCardData[];
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
 }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div>
       <div className="flex justify-between">
         <div>My Care Team | {doctorCount} Doctors</div>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <form>
             <DialogTrigger
               render={<Button className="mt-3 mb-8">Add Doctor</Button>}
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
-              <AddDoctorCard setDoctorCards={setDoctorCards}></AddDoctorCard>
+              <AddDoctorCard
+                setDoctorCards={setDoctorCards}
+                setIsDialogOpen={setIsDialogOpen}
+              ></AddDoctorCard>
             </DialogContent>
           </form>
         </Dialog>
