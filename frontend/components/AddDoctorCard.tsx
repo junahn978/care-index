@@ -118,7 +118,9 @@ export default function AddDoctorCard({
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   async function onSubmit(data: z.infer<typeof formSchema>) {
     console.log("submitting");
+    console.log(setDoctorCards);
     const newCard: DoctorCardData = await createDoctorCard(data);
+
     setDoctorCards((cards) => [...cards, newCard]);
   }
 

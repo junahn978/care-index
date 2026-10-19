@@ -26,19 +26,24 @@ export default function Home() {
     fetchDoctorCards();
   }, []);
 
+  useEffect(() => {
+    console.log(doctorCards);
+  }, [doctorCards]);
+
   return (
     <div>
       <Header />
       <div className="flex justify-center">
-        {isLoading ? <Spinner /> : null}
-        {doctorCards.length > 0 ? (
+        {isLoading ? (
+          <Spinner />
+        ) : doctorCards.length > 0 ? (
           <DisplayDoctorCard
             doctorCount={doctorCards.length}
             doctorCards={doctorCards}
             setDoctorCards={setDoctorCards}
           />
         ) : (
-          <NoDoctorCards />
+          <NoDoctorCards setDoctorCards={setDoctorCards} />
         )}
       </div>
     </div>

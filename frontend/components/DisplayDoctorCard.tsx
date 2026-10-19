@@ -1,3 +1,5 @@
+"use client";
+
 import DoctorCard from "./DoctorCard";
 import { Dispatch, SetStateAction } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
