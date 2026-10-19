@@ -12,7 +12,7 @@ export default function Header() {
         width={150}
         height={50}
       />
-      <Button size="xl" className="bg-[#008378]">
+      <Button size="xl">
         My Care Team / Doctors
       </Button>
       <div className="flex items-center gap-2 mr-5">
