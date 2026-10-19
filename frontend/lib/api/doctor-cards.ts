@@ -85,7 +85,17 @@ export async function getDoctorCards(): Promise<DoctorCardData[]> {
   return cards.map(convertToDoctorCardData);
 }
 
-export async function editDoctorCard() {}
+export async function editDoctorCard(card_id: number) {
+  const url = `${API_URL}/doctor-card/${card_id}`;
+
+  const response = await fetch(url, { method: "PATCH" });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const newCard: ApiDoctorCardResponse[] = await response.json();
+  return newCard;
+}
 
 export async function deleteDoctorCard(card_id: number) {
   const url = `${API_URL}/doctor-card/${card_id}`;
