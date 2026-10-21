@@ -3,6 +3,7 @@
 import DoctorCard from "./DoctorCard";
 import { useState } from "react";
 import { Dispatch, SetStateAction } from "react";
+import { UserRoundPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import AddDoctorCard from "./AddDoctorCard";
@@ -22,12 +23,17 @@ export default function DisplayDoctorCard({
 
   return (
     <div>
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center my-5 px-4 py-3 shadow-lg rounded-lg">
         <div>My Care Team | {doctorCount} Doctors</div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <form>
             <DialogTrigger
-              render={<Button className="mt-3 mb-8">Add Doctor</Button>}
+              render={
+                <Button size="lg">
+                  <UserRoundPlus />
+                  Add Doctor
+                </Button>
+              }
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
               <AddDoctorCard
@@ -40,7 +46,7 @@ export default function DisplayDoctorCard({
           </form>
         </Dialog>
       </div>
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-2 gap-5 my-10">
         {doctorCards.map((doctorCards) => (
           <DoctorCard
             key={doctorCards.doctorName}

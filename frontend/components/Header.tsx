@@ -17,7 +17,10 @@ export default function Header() {
         />
       </Link>
       <Button size="xl">My Care Team / Doctors</Button>
-      <div className="flex items-center gap-2 mr-5">
+      <div
+        className="flex items-center gap-2 mr-5 "
+        style={{ cursor: "pointer" }}
+      >
         <User size={30} color="#008378" />
         <p className="">John Doe</p>
       </div>

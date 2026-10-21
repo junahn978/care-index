@@ -29,7 +29,7 @@ export default function DoctorCard({
   }
 
   return (
-    <div className="mb-8 border-2 border-solid p-4">
+    <div className="mb-8 border-2 border-solid p-4 shadow-md rounded-lg">
       <div className="grid grid-cols-2 gap-6 mb-7">
         <div className="flex">
           <User className="mr-2" /> {card.doctorName}
