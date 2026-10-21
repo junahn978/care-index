@@ -10,11 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 import * as z from "zod";
-import { createDoctorCard } from "@/lib/api/doctor-cards";
-import { DoctorCardData, NewDoctorCardData } from "@/lib/types";
+import { editDoctorCard } from "@/lib/api/doctor-cards";
+import { DoctorCardData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -97,7 +96,8 @@ export default function EditDoctorCard({
   setIsDialogOpen,
   setShowSpinner,
   showSpinner,
-}: {
+  ...card
+}: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
   setShowSpinner: Dispatch<SetStateAction<boolean>>;
@@ -106,28 +106,27 @@ export default function EditDoctorCard({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      doctorName: "",
-      specialty: "",
-      clinicName: "",
-      phone: "",
-      website: "",
-      streetAddress1: "",
-      streetAddress2: "",
-      city: "",
-      stateProvince: "",
-      zipCode: "",
-      country: "",
-      notes: "",
+      doctorName: card.doctorName,
+      specialty: card.specialty,
+      clinicName: card.clinicName ?? "",
+      phone: card.phone ?? "",
+      website: card.website ?? "",
+      streetAddress1: card.streetAddress1,
+      streetAddress2: card.streetAddress2 ?? "",
+      city: card.city,
+      stateProvince: card.stateProvince,
+      zipCode: card.zipCode ?? "",
+      country: card.country,
+      notes: card.notes ?? "",
     },
   });
 
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setShowSpinner(true);
-    const newCard: DoctorCardData = await createDoctorCard(data);
-    setDoctorCards((cards) => [...cards, newCard]);
+    const editedCard: DoctorCardData = await editDoctorCard(card.cardId, data);
+    setDoctorCards((cards) => [...cards, editedCard]);
     setShowSpinner(false);
-
     setIsDialogOpen(false);
   }
 

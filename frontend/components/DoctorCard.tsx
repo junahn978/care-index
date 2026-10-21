@@ -7,23 +7,11 @@ import { deleteDoctorCard } from "@/lib/api/doctor-cards";
 import EditDoctorCard from "./EditDoctorCard";
 
 export default function DoctorCard({
-  cardId,
-  doctorName,
-  specialty,
-  clinicName,
-  phone,
-  website,
-  streetAddress1,
-  streetAddress2,
-  city,
-  stateProvince,
-  zipCode,
-  country,
-  notes,
   setDoctorCards,
   setIsDialogOpen,
   setShowSpinner,
   showSpinner,
+  ...card
 }: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -31,36 +19,38 @@ export default function DoctorCard({
   showSpinner: boolean;
 }) {
   async function handleRemove() {
-    await deleteDoctorCard(cardId);
+    await deleteDoctorCard(card.cardId);
     removeDoctorCardId();
   }
 
   // removes the specific doctor card based on the cardId and updates the state to trigger rerender
   function removeDoctorCardId() {
-    setDoctorCards((cards) => cards.filter((card) => card.cardId !== cardId));
+    setDoctorCards((cards) =>
+      cards.filter((card) => card.cardId !== card.cardId),
+    );
   }
 
   return (
     <div className="mb-8 border-2 border-solid p-4">
       <div className="grid grid-cols-2 gap-6 mb-7">
         <div className="flex">
-          <User className="mr-2" /> {doctorName}
+          <User className="mr-2" /> {card.doctorName}
         </div>
-        <div>{specialty}</div>
+        <div>{card.specialty}</div>
         <div className="flex">
-          <Phone color="#008378" className="mr-2" /> {phone ?? "-"}
+          <Phone color="#008378" className="mr-2" /> {card.phone ?? "-"}
         </div>
         <div className="flex">
-          <Globe color="#008378" className="mr-2" /> {website ?? "-"}
+          <Globe color="#008378" className="mr-2" /> {card.website ?? "-"}
         </div>
       </div>
       <div className="flex mb-7">
         <MapPin size={20} color="#008378" />
         <div className="ml-2">
-          {clinicName ?? "-"}
+          {card.clinicName ?? "-"}
           <div>
-            {streetAddress1},{streetAddress2 ?? "-"},{city},{stateProvince},
-            {zipCode ?? "-"},{country}
+            {card.streetAddress1},{card.streetAddress2 ?? "-"},{card.city},
+            {card.stateProvince},{card.zipCode ?? "-"},{card.country}
           </div>
         </div>
       </div>
@@ -68,7 +58,7 @@ export default function DoctorCard({
         <FileText size={20} color="#008378" />
         <div className="ml-2">
           Notes
-          <div>{notes ?? "-"}</div>
+          <div>{card.notes ?? "-"}</div>
         </div>
       </div>
       <div className="flex justify-between">
@@ -80,6 +70,7 @@ export default function DoctorCard({
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
               <EditDoctorCard
+                {...card}
                 setDoctorCards={setDoctorCards}
                 setIsDialogOpen={setIsDialogOpen}
                 showSpinner={showSpinner}

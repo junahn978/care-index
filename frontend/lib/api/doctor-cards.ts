@@ -85,16 +85,23 @@ export async function getDoctorCards(): Promise<DoctorCardData[]> {
   return cards.map(convertToDoctorCardData);
 }
 
-export async function editDoctorCard(card_id: number) {
+export async function editDoctorCard(card_id: number, card: NewDoctorCardData) {
   const url = `${API_URL}/doctor-card/${card_id}`;
+  const converted_card = convertToDoctorCardDataBackend(card);
 
-  const response = await fetch(url, { method: "PATCH" });
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(converted_card),
+  });
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  const newCard: ApiDoctorCardResponse[] = await response.json();
-  return newCard;
+  const newCard: ApiDoctorCardResponse = await response.json();
+
+  return convertToDoctorCardData(newCard);
 }
 
 export async function deleteDoctorCard(card_id: number) {
