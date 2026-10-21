@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import DisplayDoctorCard from "@/components/DisplayDoctorCard";
 import NoDoctorCards from "@/components/NoDoctorCard";
-import Header from "@/components/header";
+import Header from "@/components/Header";
 import { getDoctorCards } from "@/lib/api/doctor-cards";
 import { DoctorCardData } from "@/lib/types";
 

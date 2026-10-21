@@ -10,11 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, UserPlus, Plus, X } from "lucide-react";
+import { DialogClose } from "@/components/ui/dialog";
 import * as z from "zod";
 import { createDoctorCard } from "@/lib/api/doctor-cards";
-import { DoctorCardData, NewDoctorCardData } from "@/lib/types";
+import { DoctorCardData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -95,9 +95,13 @@ const formSchema = z.object({
 export default function AddDoctorCard({
   setDoctorCards,
   setIsDialogOpen,
+  setShowSpinner,
+  showSpinner,
 }: {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setShowSpinner: Dispatch<SetStateAction<boolean>>;
+  showSpinner: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -119,18 +123,35 @@ export default function AddDoctorCard({
 
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    setShowSpinner(true);
     const newCard: DoctorCardData = await createDoctorCard(data);
     setDoctorCards((cards) => [...cards, newCard]);
+    setShowSpinner(false);
     setIsDialogOpen(false);
   }
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Add New Doctor</CardTitle>
-        <CardDescription>
-          Enter healthcare provider details to display in your directory.
-        </CardDescription>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg border border-[#C6FFF3] bg-[#EFFFFB] p-2">
+              <UserPlus color="#0F766E" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <CardTitle>Add New Doctor</CardTitle>
+              <CardDescription>
+                Enter healthcare provider details to display in your directory.
+              </CardDescription>
+            </div>
+          </div>
+          <DialogClose
+            render={<Button variant="ghost" size="icon-sm" />}
+          >
+            <X />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+        </div>
       </CardHeader>
       <FieldSeparator />
       <CardContent>
@@ -441,13 +462,14 @@ export default function AddDoctorCard({
         </form>
       </CardContent>
       <CardFooter>
-        <Field orientation="horizontal">
+        <Field orientation="horizontal" className="justify-end">
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
           <Button type="submit" form="form-rhf-demo">
-            Submit
+            <Plus color="#FFFFFF" /> Save Doctor
           </Button>
+          {showSpinner && <Spinner />}
         </Field>
       </CardFooter>
     </Card>

@@ -13,7 +13,8 @@ export default function NoDoctorCards({
 }: {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
 }) {
-  const [isAddDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
 
   return (
     <div className="flex flex-col items-center mt-60 bg-[#ffffff] w-150">
@@ -24,15 +25,20 @@ export default function NoDoctorCards({
         yet.
       </h2>
 
-      <Dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <form>
           <DialogTrigger
             render={<Button className="mt-3 mb-8">Add Doctor</Button>}
           />
-          <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
+          <DialogContent
+            showCloseButton={false}
+            className="p-0 sm:max-w-[672px] max-h-[825px] overflow-y-auto"
+          >
             <AddDoctorCard
               setDoctorCards={setDoctorCards}
               setIsDialogOpen={setIsDialogOpen}
+              showSpinner={showSpinner}
+              setShowSpinner={setShowSpinner}
             ></AddDoctorCard>
           </DialogContent>
         </form>
