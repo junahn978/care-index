@@ -39,7 +39,10 @@ export default function DisplayDoctorCard({
                 </Button>
               }
             />
-            <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
+            <DialogContent
+            showCloseButton={false}
+            className="p-0 sm:max-w-[672px] max-h-[825px] overflow-y-auto"
+          >
               <AddDoctorCard
                 setDoctorCards={setDoctorCards}
                 setIsDialogOpen={setIsDialogOpen}

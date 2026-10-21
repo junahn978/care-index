@@ -10,7 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, UserPen, Check, X } from "lucide-react";
+import { DialogClose } from "@/components/ui/dialog";
 import * as z from "zod";
 import { editDoctorCard } from "@/lib/api/doctor-cards";
 import { DoctorCardData } from "@/lib/types";
@@ -137,11 +138,24 @@ export default function EditDoctorCard({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Edit Doctor Card</CardTitle>
-        <CardDescription>
-          Edit healthcare provider details to update the information in your
-          directory.
-        </CardDescription>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg border border-[#C6FFF3] bg-[#EFFFFB] p-2">
+              <UserPen color="#0F766E" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <CardTitle>Edit Doctor Card</CardTitle>
+              <CardDescription>
+                Edit healthcare provider details to update the information in
+                your directory.
+              </CardDescription>
+            </div>
+          </div>
+          <DialogClose render={<Button variant="ghost" size="icon-sm" />}>
+            <X />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+        </div>
       </CardHeader>
       <FieldSeparator />
       <CardContent>
@@ -452,12 +466,12 @@ export default function EditDoctorCard({
         </form>
       </CardContent>
       <CardFooter>
-        <Field orientation="horizontal">
+        <Field orientation="horizontal" className="justify-end">
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
           <Button type="submit" form="form-rhf-demo">
-            Submit
+            <Check color="#FFFFFF" /> Save Changes
           </Button>
           {showSpinner && <Spinner />}
         </Field>
