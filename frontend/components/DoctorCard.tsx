@@ -25,9 +25,7 @@ export default function DoctorCard({
 
   // removes the specific doctor card based on the cardId and updates the state to trigger rerender
   function removeDoctorCardId() {
-    setDoctorCards((cards) =>
-      cards.filter((card) => card.cardId !== card.cardId),
-    );
+    setDoctorCards((cards) => cards.filter((c) => c.cardId !== card.cardId));
   }
 
   return (
