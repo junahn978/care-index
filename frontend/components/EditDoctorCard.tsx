@@ -125,7 +125,11 @@ export default function EditDoctorCard({
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setShowSpinner(true);
     const editedCard: DoctorCardData = await editDoctorCard(card.cardId, data);
-    setDoctorCards((cards) => [...cards, editedCard]);
+    setDoctorCards((cards) =>
+      cards.map((card) =>
+        card.cardId === editedCard.cardId ? editedCard : card,
+      ),
+    );
     setShowSpinner(false);
     setIsDialogOpen(false);
   }
