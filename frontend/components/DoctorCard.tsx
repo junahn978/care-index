@@ -1,4 +1,7 @@
+"use client";
+
 import { MapPin, Phone, Globe, FileText, User } from "lucide-react";
+import { useState } from "react";
 import { DoctorCardData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Dispatch, SetStateAction } from "react";
@@ -8,16 +11,13 @@ import EditDoctorCard from "./EditDoctorCard";
 
 export default function DoctorCard({
   setDoctorCards,
-  setIsDialogOpen,
-  setShowSpinner,
-  showSpinner,
   ...card
 }: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
-  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-  setShowSpinner: Dispatch<SetStateAction<boolean>>;
-  showSpinner: boolean;
 }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
+
   async function handleRemove() {
     await deleteDoctorCard(card.cardId);
     removeDoctorCardId();
@@ -63,7 +63,7 @@ export default function DoctorCard({
       </div>
       <div className="flex justify-between">
         <Button onClick={handleRemove}>Remove</Button>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <form>
             <DialogTrigger
               render={<Button className="mt-3 mb-8">Edit Details</Button>}
@@ -72,9 +72,9 @@ export default function DoctorCard({
               <EditDoctorCard
                 {...card}
                 setDoctorCards={setDoctorCards}
-                setIsDialogOpen={setIsDialogOpen}
-                showSpinner={showSpinner}
                 setShowSpinner={setShowSpinner}
+                showSpinner={showSpinner}
+                setIsDialogOpen={setIsDialogOpen}
               ></EditDoctorCard>
             </DialogContent>
           </form>

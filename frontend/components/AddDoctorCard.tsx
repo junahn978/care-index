@@ -127,7 +127,6 @@ export default function AddDoctorCard({
     const newCard: DoctorCardData = await createDoctorCard(data);
     setDoctorCards((cards) => [...cards, newCard]);
     setShowSpinner(false);
-
     setIsDialogOpen(false);
   }
 

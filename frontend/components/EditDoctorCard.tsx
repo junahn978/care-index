@@ -93,14 +93,14 @@ const formSchema = z.object({
 
 export default function EditDoctorCard({
   setDoctorCards,
-  setIsDialogOpen,
   setShowSpinner,
+  setIsDialogOpen,
   showSpinner,
   ...card
 }: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
-  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
   setShowSpinner: Dispatch<SetStateAction<boolean>>;
+  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
   showSpinner: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
