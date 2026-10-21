@@ -1,6 +1,14 @@
 "use client";
 
-import { MapPin, Phone, Globe, FileText, User } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Globe,
+  FileText,
+  User,
+  Trash,
+  PencilLine,
+} from "lucide-react";
 import { useState } from "react";
 import { DoctorCardData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -29,12 +37,12 @@ export default function DoctorCard({
   }
 
   return (
-    <div className="mb-8 border-2 border-solid p-4 shadow-md rounded-lg">
+    <div className="mb-8 border-2 border-solid p-4 shadow-md rounded-lg p-9">
       <div className="grid grid-cols-2 gap-6 mb-7">
         <div className="flex">
           <User className="mr-2" /> {card.doctorName}
         </div>
-        <div>{card.specialty}</div>
+        <div className="text-right">{card.specialty}</div>
         <div className="flex">
           <Phone color="#008378" className="mr-2" /> {card.phone ?? "-"}
         </div>
@@ -59,12 +67,19 @@ export default function DoctorCard({
           <div>{card.notes ?? "-"}</div>
         </div>
       </div>
-      <div className="flex justify-between">
-        <Button onClick={handleRemove}>Remove</Button>
+      <div className="flex justify-between items-center pt-10">
+        <Button size="xl" onClick={handleRemove}>
+          <Trash /> Remove
+        </Button>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <form>
             <DialogTrigger
-              render={<Button className="mt-3 mb-8">Edit Details</Button>}
+              render={
+                <Button size="xl">
+                  {" "}
+                  <PencilLine /> Edit Details
+                </Button>
+              }
             />
             <DialogContent className="sm:max-w-[672px] max-h-[825px] overflow-y-auto">
               <EditDoctorCard

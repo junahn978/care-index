@@ -23,13 +23,17 @@ export default function DisplayDoctorCard({
 
   return (
     <div>
-      <div className="flex justify-between items-center my-5 px-4 py-3 shadow-lg rounded-lg">
-        <div>My Care Team | {doctorCount} Doctors</div>
+      <div className="flex justify-between items-center my-5 px-4 py-3 shadow-lg rounded-lg border-1 border-solid">
+        <div className="flex items-center gap-3">
+          <span>My Care Team</span>
+          <span>|</span>
+          <span>{doctorCount} Doctors</span>
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <form>
             <DialogTrigger
               render={
-                <Button size="lg">
+                <Button size="xl">
                   <UserRoundPlus />
                   Add Doctor
                 </Button>
