@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import * as z from "zod";
 import { cn } from "cn";
 import createClient from "@/lib/supabase";
@@ -21,6 +23,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { SignupForm } from "./SignUpForm";
 
 // defining the zod schema for client input validation
 const formSchema = z.object({
@@ -48,6 +51,8 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -137,7 +142,18 @@ export function LoginForm({
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
+                  Don&apos;t have an account?{" "}
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <form>
+                      <DialogTrigger render={<a href="#">Sign up</a>} />
+                      <DialogContent
+                        showCloseButton={false}
+                        className="p-0 sm:max-w-[672px] max-h-[825px] overflow-y-auto"
+                      >
+                        <SignupForm setIsDialogOpen={setIsDialogOpen} />
+                      </DialogContent>
+                    </form>
+                  </Dialog>
                 </FieldDescription>
               </Field>
             </FieldGroup>
