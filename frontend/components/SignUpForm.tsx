@@ -20,6 +20,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import createClient from "@/lib/supabase";
 
 // defining the zod schema for client input validation
 const formSchema = z
@@ -50,6 +51,13 @@ const formSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
+const handleSignup = async (email: string, password: string) => {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
+  return data;
+};
 
 export function SignupForm({
   setIsDialogOpen,
