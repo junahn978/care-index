@@ -1,6 +1,6 @@
 import jwt
 from fastapi import HTTPException, status
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.app.config import SUPABASE_URL
 
 allowable_list = ["junahn45@gmail.com"]
@@ -28,14 +28,6 @@ def verify_access_token(token: str):
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
 
-
-# browser sends the access toeken (JWT) in the header, decode using PyJWT and at minimum, verify the following information:
-#   "iss, aud, exp, signature, then read sub"
-#   additionally, we will also need to check if the email is listed in our allowable_list of emails allowed to sign up
-
-
-# our API server will:
-    # check signature/exp/aud via JWKS (no DB call)
-    # Owner/Share authorization
-#(token near expiry) Browser ──refresh token──▶ Supabase ──▶ new JWT + new refresh token
-
+def get_current_user_id(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> UUID: 
+    payload = verify_access_token(creds.credentials)
+    return UUID(payload["sub"])
