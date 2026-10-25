@@ -1,5 +1,6 @@
 import jwt
-from fastapi import HTTPException, status
+from uuid import UUID
+from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.app.config import SUPABASE_URL
 
