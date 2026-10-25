@@ -52,9 +52,17 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-const handleSignup = async (email: string, password: string) => {
+const handleSignUp = async (
+  email: string,
+  password: string,
+  fullName: string,
+) => {
   const supabase = createClient();
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { fullName } },
+  });
   if (error) throw error;
   return data;
 };
@@ -88,7 +96,12 @@ export function SignupForm({
 
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+    try {
+      const res = await handleSignUp(data.email, data.password, data.fullName);
+      console.log(res);
+    } catch (error) {
+      console.log(`sign up failed:${error}`);
+    }
   }
 
   return (
@@ -197,7 +210,10 @@ export function SignupForm({
             />
             <FieldGroup>
               <Field>
-                <Button type="submit" disabled={!passwordsMatch}>
+                <Button
+                  type="submit"
+                  disabled={!passwordsMatch || form.formState.isSubmitting}
+                >
                   Create Account
                 </Button>
                 <FieldDescription className="px-6 text-center">
