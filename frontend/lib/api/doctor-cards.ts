@@ -1,6 +1,8 @@
 import { DoctorCardData, NewDoctorCardData } from "../types";
+import createClient from "../supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const supabase = createClient();
 
 // Shape of a card as the FastAPI backend sends it
 type ApiDoctorCardResponse = {
@@ -73,10 +75,26 @@ function convertToDoctorCardDataBackend(doctorCard: NewDoctorCardData) {
   return doctorCardData;
 }
 
+async function authHeaders() {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error("Error fetching session:", error.message);
+  }
+
+  const token = session?.access_token;
+  return { Authorization: `Bearer ${token}` };
+}
+
 export async function getDoctorCards(): Promise<DoctorCardData[]> {
   const url = `${API_URL}/doctor-card/`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: { ...(await authHeaders()) },
+  });
   if (!response.ok) {
     throw new Error(`Response status: ${response.status}`);
   }
@@ -91,7 +109,7 @@ export async function editDoctorCard(card_id: number, card: NewDoctorCardData) {
 
   const response = await fetch(url, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(converted_card),
   });
 
@@ -107,7 +125,10 @@ export async function editDoctorCard(card_id: number, card: NewDoctorCardData) {
 export async function deleteDoctorCard(card_id: number) {
   const url = `${API_URL}/doctor-card/${card_id}`;
 
-  const response = await fetch(url, { method: "DELETE" });
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: { ...(await authHeaders()) },
+  });
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -123,7 +144,7 @@ export async function createDoctorCard(card: NewDoctorCardData) {
 
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(converted_card),
   });
   if (!response.ok) {

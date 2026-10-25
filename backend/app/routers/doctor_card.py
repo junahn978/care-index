@@ -4,7 +4,8 @@ from backend.app.db import get_db
 from backend.app.schemas.doctor_cards import DoctorCardCreate, DoctorCardResponse, DoctorCardUpdate
 from backend.app.services.doctor_card import create_doctor_card, retrieve_doctor_card, update_doctor_card, remove_doctor_card, retrieve_all_doctor_card
 import uuid
-from uuid import UUID 
+from uuid import UUID
+from backend.app.auth import get_current_user_id
 
 mock_user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
 
@@ -21,8 +22,7 @@ router = APIRouter(
     status_code=201,
     summary="Create a new Doctor Card",
 )
-def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
-    user_id = mock_user_id
+def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db), user_id: UUID = Depends(get_current_user_id)):
     response = create_doctor_card(db, card, user_id)
     return response
 
@@ -33,8 +33,7 @@ def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db)):
     status_code=200,
     summary="Get Doctor Card information"
 )
-def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
-    user_id = mock_user_id
+def get_doctor_card(card_id: int, db:Session = Depends(get_db), user_id: UUID = Depends(get_current_user_id)):
     response = retrieve_doctor_card(db, card_id, user_id)
     
     if response is None:
@@ -48,8 +47,7 @@ def get_doctor_card(card_id: int, db:Session = Depends(get_db)):
     status_code=200,
     summary="get all doctor card for a given user"
 )
-def get_all_doctor_card(db:Session = Depends(get_db)):
-    user_id = mock_user_id
+def get_all_doctor_card(db:Session = Depends(get_db), user_id: UUID = Depends(get_current_user_id)):
     response = retrieve_all_doctor_card(db, user_id)
 
     return response
@@ -62,8 +60,7 @@ def get_all_doctor_card(db:Session = Depends(get_db)):
     status_code=200,
     summary="Update Doctor Card Information"
 )
-def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends(get_db)):
-    user_id = mock_user_id
+def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends(get_db), user_id: UUID = Depends(get_current_user_id)):
     response = update_doctor_card(db, card_id, card, user_id)
     
     if response is None: 
@@ -76,8 +73,7 @@ def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends
     status_code=204,
     summary="Delete doctor card"
 )
-def delete_doctor_card(card_id: int, db: Session = Depends(get_db)):
-    user_id = mock_user_id
+def delete_doctor_card(card_id: int, db: Session = Depends(get_db), user_id: UUID = Depends(get_current_user_id)):
     response = remove_doctor_card(db, card_id, user_id)
 
     if not response: 
