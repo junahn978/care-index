@@ -16,6 +16,11 @@ import createClient from "@/lib/supabase";
 
 const supabase = createClient();
 
+const handleSignOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  console.log("suecesfully signed out!");
+};
+
 export default function Header() {
   const [fullName, setFullName] = useState("");
 
@@ -59,7 +64,7 @@ export default function Header() {
             <User /> View profile
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
             <LogOut /> Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
