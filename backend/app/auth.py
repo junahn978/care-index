@@ -1,11 +1,9 @@
-import os
 import jwt
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from fastapi.security import HTTPBearer
+from backend.app.config import SUPABASE_URL
 
 allowable_list = ["junahn45@gmail.com"]
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ISSUER = f"{SUPABASE_URL}/auth/v1"
 
 jwks_client = jwt.PyJWKClient(f"{SUPABASE_ISSUER}/.well-known/jwks.json")
@@ -26,9 +24,10 @@ def verify_access_token(token: str):
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token expired")
-        
+
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
+
 
 # browser sends the access toeken (JWT) in the header, decode using PyJWT and at minimum, verify the following information:
 #   "iss, aud, exp, signature, then read sub"
