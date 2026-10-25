@@ -1,9 +1,31 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import createClient from "@/lib/supabase";
+
+const supabase = createClient();
 
 export default function Header() {
+  const [fullName, setFullName] = useState("");
+
+  useEffect(() => {
+    async function obtainUserName() {
+      const { data, error } = await supabase.auth.getClaims();
+
+      if (error) {
+        throw new Error(`Error fetching claims: ${error.message}`);
+      }
+
+      const fullName = data?.claims.user_metadata?.full_name;
+      setFullName(fullName);
+    }
+    obtainUserName();
+  }, []);
+
   return (
     <div className="flex items-center justify-between bg-[#ffffff] h-[100px]">
       <Link href="/" className="ml-5">
@@ -22,7 +44,7 @@ export default function Header() {
         style={{ cursor: "pointer" }}
       >
         <User size={30} color="#008378" />
-        <p className="">John Doe</p>
+        <p className="">{fullName}</p>
       </div>
     </div>
   );

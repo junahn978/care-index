@@ -61,7 +61,7 @@ const handleSignUp = async (
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { fullName } },
+    options: { data: { full_name: fullName } },
   });
   if (error) throw error;
   return data;

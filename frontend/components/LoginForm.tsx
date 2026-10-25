@@ -64,8 +64,7 @@ export function LoginForm({
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
-      const res = await handleSignIn(data.email, data.password);
-      console.log(res);
+      await handleSignIn(data.email, data.password);
     } catch (error) {
       form.setError("root", {
         message: error instanceof Error ? error.message : "Sign in failed",
