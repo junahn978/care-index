@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dispatch, SetStateAction } from "react";
+import { useRouter } from "next/navigation";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,8 @@ export function SignupForm({
 }: {
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
 } & React.ComponentProps<typeof Card>) {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -99,6 +102,8 @@ export function SignupForm({
     try {
       const res = await handleSignUp(data.email, data.password, data.fullName);
       console.log(res);
+      // only reached if handleSignUp didn't throw, i.e. the account was created
+      router.replace("/");
     } catch (error) {
       console.log(`sign up failed:${error}`);
     }
