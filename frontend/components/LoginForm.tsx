@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import * as z from "zod";
@@ -52,6 +53,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,8 +66,9 @@ export function LoginForm({
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
-      const res = await handleSignIn(data.email, data.password);
-      console.log(res);
+      await handleSignIn(data.email, data.password);
+      // only reached if handleSignIn didn't throw, i.e. sign-in succeeded
+      router.replace("/");
     } catch (error) {
       form.setError("root", {
         message: error instanceof Error ? error.message : "Sign in failed",
