@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { LogOut, User } from "lucide-react";
@@ -16,13 +17,16 @@ import createClient from "@/lib/supabase";
 
 const supabase = createClient();
 
-const handleSignOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  console.log("suecesfully signed out!");
-};
-
 export default function Header() {
   const [fullName, setFullName] = useState("");
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    router.refresh();
+    router.replace("/login");
+    console.log("suecesfully signed out!");
+  };
 
   useEffect(() => {
     async function obtainUserName() {
