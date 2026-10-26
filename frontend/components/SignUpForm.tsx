@@ -5,9 +5,11 @@ import { Dispatch, SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
+import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -116,6 +118,17 @@ export function SignupForm({
         <CardDescription>
           Enter your information below to create your account
         </CardDescription>
+        <CardAction>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            type="button"
+            onClick={closeDialog}
+          >
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -131,7 +144,7 @@ export function SignupForm({
                     id="signup-name"
                     type="text"
                     aria-invalid={fieldState.invalid}
-                    placeholder="John Doe"
+                    placeholder=""
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -150,12 +163,8 @@ export function SignupForm({
                     id="signup-email"
                     type="email"
                     aria-invalid={fieldState.invalid}
-                    placeholder="m@example.com"
+                    placeholder=""
                   />
-                  <FieldDescription>
-                    We&apos;ll use this to contact you. We will not share your
-                    email with anyone else.
-                  </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -198,9 +207,7 @@ export function SignupForm({
                     type="password"
                     aria-invalid={fieldState.invalid || !passwordsMatch}
                   />
-                  <FieldDescription>
-                    Please confirm your password.
-                  </FieldDescription>
+
                   {fieldState.invalid ? (
                     <FieldError errors={[fieldState.error]} />
                   ) : (
