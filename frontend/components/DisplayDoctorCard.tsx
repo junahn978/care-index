@@ -29,7 +29,11 @@ export default function DisplayDoctorCard({
           <span>|</span>
           <span>{doctorCount} Doctors</span>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          disablePointerDismissal
+        >
           <form>
             <DialogTrigger
               render={
@@ -40,9 +44,9 @@ export default function DisplayDoctorCard({
               }
             />
             <DialogContent
-            showCloseButton={false}
-            className="p-0 sm:max-w-[672px] max-h-[825px] overflow-y-auto"
-          >
+              showCloseButton={false}
+              className="p-0 sm:max-w-[672px] max-h-[825px] overflow-y-auto"
+            >
               <AddDoctorCard
                 setDoctorCards={setDoctorCards}
                 setIsDialogOpen={setIsDialogOpen}

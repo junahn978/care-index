@@ -220,7 +220,11 @@ export function LoginForm({
                 </Button>
                 <FieldDescription className="text-center [&>a:hover]:text-foreground/80">
                   Don&apos;t have an account?{" "}
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <Dialog
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    disablePointerDismissal
+                  >
                     <DialogTrigger render={<a href="#">Sign up</a>} />
                     <DialogContent
                       showCloseButton={false}
