@@ -44,14 +44,26 @@ const formSchema = z.object({
     .max(255, "Password cannot be longer than 255 characters"),
 });
 
+const supabase = createClient();
+
 const handleSignIn = async (email: string, password: string) => {
-  const supabase = createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
   if (error) throw error;
   return data;
+};
+
+const signInWithGoogle = async () => {
+  // sends the browser to Google; after consent, Google -> Supabase -> our /auth/callback route with a ?code=
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+  if (error) throw error;
 };
 
 export function LoginForm({
@@ -81,6 +93,17 @@ export function LoginForm({
     } catch (error) {
       form.setError("root", {
         message: error instanceof Error ? error.message : "Sign in failed",
+      });
+    }
+  }
+
+  async function onGoogleSignIn() {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      form.setError("root", {
+        message:
+          error instanceof Error ? error.message : "Google sign in failed",
       });
     }
   }
@@ -167,7 +190,12 @@ export function LoginForm({
                 or
               </FieldSeparator>
               <Field>
-                <Button variant="outline" type="button" className="gap-2.5">
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="gap-2.5"
+                  onClick={onGoogleSignIn}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
