@@ -25,7 +25,11 @@ export default function NoDoctorCards({
         yet.
       </h2>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        disablePointerDismissal
+      >
         <form>
           <DialogTrigger
             render={<Button className="mt-3 mb-8">Add Doctor</Button>}

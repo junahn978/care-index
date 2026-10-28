@@ -71,7 +71,11 @@ export default function DoctorCard({
         <Button size="xl" onClick={handleRemove}>
           <Trash /> Remove
         </Button>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          disablePointerDismissal
+        >
           <form>
             <DialogTrigger
               render={

@@ -44,14 +44,26 @@ const formSchema = z.object({
     .max(255, "Password cannot be longer than 255 characters"),
 });
 
+const supabase = createClient();
+
 const handleSignIn = async (email: string, password: string) => {
-  const supabase = createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
   if (error) throw error;
   return data;
+};
+
+const signInWithGoogle = async () => {
+  // sends the browser to Google; after consent, Google -> Supabase -> our /auth/callback route with a ?code=
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+  if (error) throw error;
 };
 
 export function LoginForm({
@@ -74,10 +86,24 @@ export function LoginForm({
     try {
       await handleSignIn(data.email, data.password);
       // only reached if handleSignIn didn't throw, i.e. sign-in succeeded
+      // cacheComponents keeps /login alive in the background (React Activity),
+      // so clear the inputs or they reappear after sign-out
+      form.reset();
       router.replace("/");
     } catch (error) {
       form.setError("root", {
         message: error instanceof Error ? error.message : "Sign in failed",
+      });
+    }
+  }
+
+  async function onGoogleSignIn() {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      form.setError("root", {
+        message:
+          error instanceof Error ? error.message : "Google sign in failed",
       });
     }
   }
@@ -164,7 +190,12 @@ export function LoginForm({
                 or
               </FieldSeparator>
               <Field>
-                <Button variant="outline" type="button" className="gap-2.5">
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="gap-2.5"
+                  onClick={onGoogleSignIn}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -217,7 +248,11 @@ export function LoginForm({
                 </Button>
                 <FieldDescription className="text-center [&>a:hover]:text-foreground/80">
                   Don&apos;t have an account?{" "}
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <Dialog
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    disablePointerDismissal
+                  >
                     <DialogTrigger render={<a href="#">Sign up</a>} />
                     <DialogContent
                       showCloseButton={false}

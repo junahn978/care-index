@@ -463,6 +463,11 @@ export default function AddDoctorCard({
       </CardContent>
       <CardFooter>
         <Field orientation="horizontal" className="justify-end">
+          <DialogClose
+            render={<Button type="button" className="mr-auto" />}
+          >
+            Cancel
+          </DialogClose>
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>

@@ -103,8 +103,11 @@ export function SignupForm({
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       const res = await handleSignUp(data.email, data.password, data.fullName);
-      console.log(res);
       // only reached if handleSignUp didn't throw, i.e. the account was created
+      // cacheComponents keeps /login alive in the background (React Activity),
+      // so clear the inputs and close the dialog or they reappear after sign-out
+      form.reset();
+      closeDialog();
       router.replace("/");
     } catch (error) {
       console.log(`sign up failed:${error}`);
