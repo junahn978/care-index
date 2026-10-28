@@ -74,6 +74,9 @@ export function LoginForm({
     try {
       await handleSignIn(data.email, data.password);
       // only reached if handleSignIn didn't throw, i.e. sign-in succeeded
+      // cacheComponents keeps /login alive in the background (React Activity),
+      // so clear the inputs or they reappear after sign-out
+      form.reset();
       router.replace("/");
     } catch (error) {
       form.setError("root", {
