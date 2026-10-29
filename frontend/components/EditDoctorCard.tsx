@@ -94,15 +94,11 @@ const formSchema = z.object({
 
 export default function EditDoctorCard({
   setDoctorCards,
-  setShowSpinner,
   setIsDialogOpen,
-  showSpinner,
   ...card
 }: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
-  setShowSpinner: Dispatch<SetStateAction<boolean>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-  showSpinner: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -123,16 +119,24 @@ export default function EditDoctorCard({
   });
 
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
+  // while this runs, formState.isSubmitting is true, which disables Save Changes and shows its spinner
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    setShowSpinner(true);
-    const editedCard: DoctorCardData = await editDoctorCard(card.cardId, data);
-    setDoctorCards((cards) =>
-      cards.map((card) =>
-        card.cardId === editedCard.cardId ? editedCard : card,
-      ),
-    );
-    setShowSpinner(false);
-    setIsDialogOpen(false);
+    try {
+      const editedCard: DoctorCardData = await editDoctorCard(
+        card.cardId,
+        data,
+      );
+      setDoctorCards((cards) =>
+        cards.map((card) =>
+          card.cardId === editedCard.cardId ? editedCard : card,
+        ),
+      );
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating doctor card:", error);
+      // a root error is cleared automatically on the next submit
+      form.setError("root", { message: "Card update failed" });
+    }
   }
 
   return (
@@ -467,6 +471,15 @@ export default function EditDoctorCard({
       </CardContent>
       <CardFooter>
         <Field orientation="horizontal" className="flex-wrap justify-end">
+          {form.formState.errors.root && (
+            // basis-full: its own line above the buttons
+            <p
+              role="alert"
+              className="basis-full text-right text-fluid-sm text-destructive"
+            >
+              {form.formState.errors.root.message}
+            </p>
+          )}
           <DialogClose
             render={<Button type="button" className="mr-auto" />}
           >
@@ -475,10 +488,21 @@ export default function EditDoctorCard({
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button type="submit" form="form-rhf-demo">
-            <Check color="#FFFFFF" /> Save Changes
+          <Button
+            type="submit"
+            form="form-rhf-demo"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <>
+                <Spinner /> Saving…
+              </>
+            ) : (
+              <>
+                <Check color="#FFFFFF" /> Save Changes
+              </>
+            )}
           </Button>
-          {showSpinner && <Spinner />}
         </Field>
       </CardFooter>
     </Card>
