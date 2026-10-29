@@ -21,6 +21,7 @@ import { Dispatch, SetStateAction } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { deleteDoctorCard } from "@/lib/api/doctor-cards";
 import EditDoctorCard from "./EditDoctorCard";
+import DeleteDoctorCard from "./DeleteDoctorCard";
 
 // adds https:// when the saved URL has no scheme, so the link always opens the external site
 // (and a value like "javascript:..." can never become a script link)
@@ -58,6 +59,7 @@ export default function DoctorCard({
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   // swaps the copy icon for a check for a moment after the phone number is copied
   const [phoneCopied, setPhoneCopied] = useState(false);
@@ -241,13 +243,30 @@ export default function DoctorCard({
             </DialogContent>
           </form>
         </Dialog>
-        <Button
-          size="xl"
-          onClick={handleRemove}
-          className="bg-[#D5F3EC] text-[#0F766E] hover:bg-[#C2EDE3]"
+        {/* Remove only opens the confirmation; the delete request is sent from inside it */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
         >
-          <Trash2 /> Remove
-        </Button>
+          <DialogTrigger
+            render={
+              <Button
+                size="xl"
+                className="bg-[#D5F3EC] text-[#0F766E] hover:bg-[#C2EDE3]"
+              >
+                <Trash2 /> Remove
+              </Button>
+            }
+          />
+          <DialogContent className="gap-0 p-6 sm:max-w-[28rem]">
+            <DeleteDoctorCard
+              doctorName={card.doctorName}
+              specialty={card.specialty}
+              clinicName={card.clinicName}
+              onDelete={handleRemove}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
