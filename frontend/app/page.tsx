@@ -33,9 +33,11 @@ export default function Home() {
   return (
     <div>
       <Header />
-      <div className="flex justify-center">
+      <main className="page-container pb-10">
         {isLoading ? (
-          <Spinner />
+          <div className="flex justify-center py-10">
+            <Spinner />
+          </div>
         ) : doctorCards.length > 0 ? (
           <DisplayDoctorCard
             doctorCount={doctorCards.length}
@@ -45,7 +47,7 @@ export default function Home() {
         ) : (
           <NoDoctorCards setDoctorCards={setDoctorCards} />
         )}
-      </div>
+      </main>
     </div>
   );
 }

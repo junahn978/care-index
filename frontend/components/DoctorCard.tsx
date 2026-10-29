@@ -36,38 +36,56 @@ export default function DoctorCard({
     setDoctorCards((cards) => cards.filter((c) => c.cardId !== card.cardId));
   }
 
+  // only the parts that are filled in, comma-and-space separated so the line can wrap
+  const address = [
+    card.streetAddress1,
+    card.streetAddress2,
+    card.city,
+    card.stateProvince,
+    card.zipCode,
+    card.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  // em-sized so icons scale with the fluid text; the offset centers them on the first line
+  const iconClass = "mt-[0.125em] size-[1.25em] shrink-0";
+
   return (
-    <div className="mb-8 border-2 border-solid p-4 shadow-md rounded-lg p-9">
-      <div className="grid grid-cols-2 gap-6 mb-7">
-        <div className="flex">
-          <User className="mr-2" /> {card.doctorName}
+    // wrap-anywhere: long names, URLs and notes break to fit even the narrow 2-column phone cards
+    <div className="flex flex-col gap-5 border-2 border-solid p-3 shadow-md rounded-lg wrap-anywhere tablet:gap-7 tablet:p-6">
+      {/* name and specialty share a row when they fit, otherwise specialty wraps below */}
+      <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+        <div className="flex gap-2">
+          <User className={iconClass} /> {card.doctorName}
         </div>
-        <div className="text-right">{card.specialty}</div>
-        <div className="flex">
-          <Phone color="#008378" className="mr-2" /> {card.phone ?? "-"}
+        <div>{card.specialty}</div>
+      </div>
+      <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <div className="flex gap-2">
+          <Phone color="#008378" className={iconClass} /> {card.phone ?? "-"}
         </div>
-        <div className="flex">
-          <Globe color="#008378" className="mr-2" /> {card.website ?? "-"}
+        <div className="flex gap-2">
+          <Globe color="#008378" className={iconClass} /> {card.website ?? "-"}
         </div>
       </div>
-      <div className="flex mb-7">
-        <MapPin size={20} color="#008378" />
-        <div className="ml-2">
+      <div className="flex gap-2">
+        <MapPin color="#008378" className={iconClass} />
+        <div>
           {card.clinicName ?? "-"}
-          <div>
-            {card.streetAddress1},{card.streetAddress2 ?? "-"},{card.city},
-            {card.stateProvince},{card.zipCode ?? "-"},{card.country}
-          </div>
+          <div>{address}</div>
         </div>
       </div>
-      <div className="flex mb-7">
-        <FileText size={20} color="#008378" />
-        <div className="ml-2">
+      <div className="flex gap-2">
+        <FileText color="#008378" className={iconClass} />
+        <div>
           Notes
           <div>{card.notes ?? "-"}</div>
         </div>
       </div>
-      <div className="flex justify-between items-center pt-10">
+      {/* mt-auto keeps the buttons on the bottom edge when cards in a row differ in height;
+          stacked full width on phones, split left and right from tablet up */}
+      <div className="mt-auto flex flex-col gap-2 pt-3 tablet:flex-row tablet:justify-between tablet:items-center tablet:pt-10">
         <Button size="xl" onClick={handleRemove}>
           <Trash /> Remove
         </Button>
@@ -79,7 +97,7 @@ export default function DoctorCard({
           <form>
             <DialogTrigger
               render={
-                <Button size="xl">
+                <Button size="xl" className="w-full tablet:w-auto">
                   {" "}
                   <PencilLine /> Edit Details
                 </Button>
@@ -87,7 +105,7 @@ export default function DoctorCard({
             />
             <DialogContent
               showCloseButton={false}
-              className="p-0 sm:max-w-[672px] max-h-[825px] overflow-y-auto"
+              className="p-0 sm:max-w-[42rem] max-h-[90svh] overflow-y-auto"
             >
               <EditDoctorCard
                 {...card}
