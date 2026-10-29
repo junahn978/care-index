@@ -39,6 +39,8 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
+import { phoneFieldPattern } from "@/lib/phone";
+import PhoneInput from "./PhoneInput";
 
 // defining the zod schema for client input validation
 const formSchema = z.object({
@@ -57,7 +59,7 @@ const formSchema = z.object({
   phone: z
     .string()
     .trim()
-    .max(32, "Phone number cannot be longer than 32 characters"),
+    .regex(phoneFieldPattern, "Phone number should be 10 digits long"),
   website: z
     .string()
     .trim()
@@ -233,10 +235,11 @@ export default function AddDoctorCard({
                     <FieldLabel htmlFor="form-rhf-demo-title">
                       Phone Number
                     </FieldLabel>
-                    <Input
+                    <PhoneInput
                       {...field}
                       id="form-rhf-demo-title"
                       aria-invalid={fieldState.invalid}
+                      placeholder="e.g. (212) 555-0100"
                       autoComplete="off"
                     />
                     {fieldState.invalid && (

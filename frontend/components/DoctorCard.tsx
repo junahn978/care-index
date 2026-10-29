@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Dispatch, SetStateAction } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { deleteDoctorCard } from "@/lib/api/doctor-cards";
+import { formatPhone } from "@/lib/phone";
 import EditDoctorCard from "./EditDoctorCard";
 import DeleteDoctorCard from "./DeleteDoctorCard";
 
@@ -62,6 +63,8 @@ export default function DoctorCard({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   // swaps the copy icon for a check for a moment after the phone number is copied
   const [phoneCopied, setPhoneCopied] = useState(false);
+  // "(212) 555-0100" whatever format it was saved in; the copy button copies it as shown
+  const phone = card.phone && formatPhone(card.phone);
 
   async function handleRemove() {
     await deleteDoctorCard(card.cardId);
@@ -74,9 +77,9 @@ export default function DoctorCard({
   }
 
   async function handleCopyPhone() {
-    if (!card.phone) return;
+    if (!phone) return;
     try {
-      await navigator.clipboard.writeText(card.phone);
+      await navigator.clipboard.writeText(phone);
       setPhoneCopied(true);
       setTimeout(() => setPhoneCopied(false), 2000);
     } catch (error) {
@@ -122,14 +125,14 @@ export default function DoctorCard({
         <div className="flex items-center justify-between gap-2">
           <span
             className={
-              card.phone
+              phone
                 ? "flex min-w-0 gap-2 text-[#0F766E]"
                 : "flex min-w-0 gap-2 text-muted-foreground"
             }
           >
-            <Phone className={iconClass} /> {card.phone ?? "-"}
+            <Phone className={iconClass} /> {phone ?? "-"}
           </span>
-          {card.phone && (
+          {phone && (
             <Button
               variant="ghost"
               size="icon-sm"
