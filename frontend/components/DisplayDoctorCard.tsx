@@ -23,10 +23,11 @@ export default function DisplayDoctorCard({
 
   return (
     <div>
-      <div className="flex justify-between items-center my-5 px-4 py-3 shadow-lg rounded-lg border-1 border-solid">
-        <div className="flex items-center gap-3">
+      {/* flex-wrap: on narrow screens the Add Doctor button drops below the title instead of squeezing it */}
+      <div className="flex flex-wrap justify-between items-center gap-3 my-5 px-4 py-3 shadow-lg rounded-lg border-1 border-solid">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span>My Care Team</span>
-          <span>|</span>
+          <span aria-hidden="true">|</span>
           <span>{doctorCount} Doctors</span>
         </div>
         <Dialog
@@ -45,7 +46,7 @@ export default function DisplayDoctorCard({
             />
             <DialogContent
               showCloseButton={false}
-              className="p-0 sm:max-w-[672px] max-h-[825px] overflow-y-auto"
+              className="p-0 sm:max-w-[42rem] max-h-[90svh] overflow-y-auto"
             >
               <AddDoctorCard
                 setDoctorCards={setDoctorCards}
@@ -57,7 +58,8 @@ export default function DisplayDoctorCard({
           </form>
         </Dialog>
       </div>
-      <div className="grid grid-cols-2 gap-5 my-10">
+      {/* 4 columns on large monitors, 3 on laptops, collapsing to 2 on tablets and phones */}
+      <div className="grid grid-cols-2 gap-3 my-6 tablet:gap-5 tablet:my-10 laptop:grid-cols-3 desktop:grid-cols-4">
         {doctorCards.map((doctorCards) => (
           <DoctorCard
             key={doctorCards.doctorName}

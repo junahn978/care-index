@@ -166,7 +166,7 @@ export default function EditDoctorCard({
           )}
         >
           <FieldGroup>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2">
               <Controller
                 name="doctorName"
                 control={form.control}
@@ -275,10 +275,10 @@ export default function EditDoctorCard({
               />
             </div>
             <FieldSeparator />
-            <h3 className="text-s font-semibold tracking-wide text-muted-foreground">
+            <h3 className="text-fluid-sm font-semibold tracking-wide text-muted-foreground">
               OFFICE LOCATION
             </h3>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 tablet:grid-cols-4">
               <Controller
                 name="streetAddress1"
                 control={form.control}
@@ -401,7 +401,7 @@ export default function EditDoctorCard({
                         render={
                           <Button
                             variant="outline"
-                            className="flex justify-between"
+                            className="flex h-auto min-h-8 justify-between text-left whitespace-normal"
                           >
                             {field.value || "Select a country"} <ChevronDown />
                           </Button>
@@ -466,7 +466,7 @@ export default function EditDoctorCard({
         </form>
       </CardContent>
       <CardFooter>
-        <Field orientation="horizontal" className="justify-end">
+        <Field orientation="horizontal" className="flex-wrap justify-end">
           <DialogClose
             render={<Button type="button" className="mr-auto" />}
           >

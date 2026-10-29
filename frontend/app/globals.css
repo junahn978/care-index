@@ -48,6 +48,37 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@theme {
+  /* screen sizes: unprefixed classes are mobile; tablet:, laptop: and desktop: apply from these widths up */
+  --breakpoint-tablet: 48rem; /* 768px */
+  --breakpoint-laptop: 64rem; /* 1024px */
+  --breakpoint-desktop: 96rem; /* 1536px, large monitors */
+
+  /* fluid type: each size grows from a 375px to a 1536px wide window, clamped at both ends,
+     and reaches the same-named Tailwind size (text-sm, text-base, ...) on desktop */
+  --text-fluid-sm: clamp(0.8125rem, 0.792rem + 0.086vw, 0.875rem); /* 13 → 14px */
+  --text-fluid-sm--line-height: 1.43;
+  --text-fluid-base: clamp(0.875rem, 0.835rem + 0.172vw, 1rem); /* 14 → 16px */
+  --text-fluid-base--line-height: 1.5;
+  --text-fluid-lg: clamp(1rem, 0.96rem + 0.172vw, 1.125rem); /* 16 → 18px */
+  --text-fluid-lg--line-height: 1.55;
+  --text-fluid-xl: clamp(1.125rem, 1.085rem + 0.172vw, 1.25rem); /* 18 → 20px */
+  --text-fluid-xl--line-height: 1.4;
+  --text-fluid-2xl: clamp(1.25rem, 1.169rem + 0.345vw, 1.5rem); /* 20 → 24px */
+  --text-fluid-2xl--line-height: 1.33;
+  --text-fluid-3xl: clamp(1.5rem, 1.379rem + 0.517vw, 1.875rem); /* 24 → 30px */
+  --text-fluid-3xl--line-height: 1.2;
+}
+
+/* page width shared by the header and main content: fills small screens,
+   stops growing on large monitors, and keeps a side gutter that scales with the window */
+@utility page-container {
+  width: 100%;
+  max-width: 96rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+}
+
 :root {
   --background: rgba(248, 249, 255);
   --foreground: oklch(0.145 0 0);
@@ -122,7 +153,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    /* wrap-break-word: a word too long for its line breaks instead of overflowing */
+    @apply bg-background text-foreground text-fluid-base wrap-break-word;
   }
   html {
     @apply font-sans;

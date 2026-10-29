@@ -104,7 +104,7 @@ export function LoginForm({
           <div className="w-fit rounded-lg border border-[#C6FFF3] bg-[#EFFFFB] p-2">
             <MailCheck color="#0F766E" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="text-fluid-3xl font-bold tracking-tight">
             Check your email
           </h1>
           <p className="text-muted-foreground">
@@ -131,7 +131,7 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-8", className)} {...props}>
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="text-fluid-3xl font-bold tracking-tight">
           {/* nowrap: never break the name at its hyphen */}
           Welcome to <span className="whitespace-nowrap">Care-Index</span>
         </h1>
