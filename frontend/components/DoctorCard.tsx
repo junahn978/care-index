@@ -60,7 +60,6 @@ export default function DoctorCard({
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [showSpinner, setShowSpinner] = useState(false);
   // swaps the copy icon for a check for a moment after the phone number is copied
   const [phoneCopied, setPhoneCopied] = useState(false);
 
@@ -236,8 +235,6 @@ export default function DoctorCard({
               <EditDoctorCard
                 {...card}
                 setDoctorCards={setDoctorCards}
-                setShowSpinner={setShowSpinner}
-                showSpinner={showSpinner}
                 setIsDialogOpen={setIsDialogOpen}
               ></EditDoctorCard>
             </DialogContent>
