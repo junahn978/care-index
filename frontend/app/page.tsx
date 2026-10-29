@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { cn } from "cn";
 import { Spinner } from "@/components/ui/spinner";
 import DisplayDoctorCard from "@/components/DisplayDoctorCard";
 import NoDoctorCards from "@/components/NoDoctorCard";
@@ -31,12 +32,39 @@ export default function Home() {
   }, [doctorCards]);
 
   return (
-    <div>
+    // flex-1: fill the screen height so the loader can sit in the middle of the space below the header
+    <div className="flex flex-1 flex-col">
       <Header />
-      <main className="page-container pb-10">
+      <main
+        className={cn(
+          "page-container",
+          isLoading ? "flex flex-1 items-center justify-center" : "pb-10",
+        )}
+      >
         {isLoading ? (
-          <div className="flex justify-center py-10">
-            <Spinner />
+          <div
+            role="status"
+            className="flex flex-col items-center gap-4 text-[#008378]"
+          >
+            <Spinner className="size-[2.5em]" aria-hidden="true" />
+            <p className="flex items-baseline text-fluid-lg font-medium">
+              Loading Data
+              {/* three dots bouncing one after another; still for users who prefer reduced motion */}
+              <span aria-hidden="true" className="flex">
+                {[
+                  "",
+                  "[animation-delay:150ms]",
+                  "[animation-delay:300ms]",
+                ].map((delay, i) => (
+                  <span
+                    key={i}
+                    className={cn("animate-bounce motion-reduce:animate-none", delay)}
+                  >
+                    .
+                  </span>
+                ))}
+              </span>
+            </p>
           </div>
         ) : doctorCards.length > 0 ? (
           <DisplayDoctorCard
