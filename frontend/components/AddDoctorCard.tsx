@@ -97,13 +97,9 @@ const formSchema = z.object({
 export default function AddDoctorCard({
   setDoctorCards,
   setIsDialogOpen,
-  setShowSpinner,
-  showSpinner,
 }: {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-  setShowSpinner: Dispatch<SetStateAction<boolean>>;
-  showSpinner: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -124,12 +120,17 @@ export default function AddDoctorCard({
   });
 
   // React Hook Form automatically handling on-submit form event. only triggered if all client input passes the Zod Schema
+  // while this runs, formState.isSubmitting is true, which disables Save Doctor and shows its spinner
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    setShowSpinner(true);
-    const newCard: DoctorCardData = await createDoctorCard(data);
-    setDoctorCards((cards) => [...cards, newCard]);
-    setShowSpinner(false);
-    setIsDialogOpen(false);
+    try {
+      const newCard: DoctorCardData = await createDoctorCard(data);
+      setDoctorCards((cards) => [...cards, newCard]);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding doctor card:", error);
+      // a root error is cleared automatically on the next submit
+      form.setError("root", { message: "Card creation failed" });
+    }
   }
 
   return (
@@ -474,6 +475,15 @@ export default function AddDoctorCard({
       </CardContent>
       <CardFooter>
         <Field orientation="horizontal" className="flex-wrap justify-end">
+          {form.formState.errors.root && (
+            // basis-full: its own line above the buttons
+            <p
+              role="alert"
+              className="basis-full text-right text-fluid-sm text-destructive"
+            >
+              {form.formState.errors.root.message}
+            </p>
+          )}
           <DialogClose
             render={<Button type="button" className="mr-auto" />}
           >
@@ -482,10 +492,21 @@ export default function AddDoctorCard({
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button type="submit" form="form-rhf-demo">
-            <Plus color="#FFFFFF" /> Save Doctor
+          <Button
+            type="submit"
+            form="form-rhf-demo"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <>
+                <Spinner /> Adding…
+              </>
+            ) : (
+              <>
+                <Plus color="#FFFFFF" /> Save Doctor
+              </>
+            )}
           </Button>
-          {showSpinner && <Spinner />}
         </Field>
       </CardFooter>
     </Card>
