@@ -499,7 +499,7 @@ export default function AddDoctorCard({
           >
             {form.formState.isSubmitting ? (
               <>
-                <Spinner /> Adding…
+                <Spinner /> Saving…
               </>
             ) : (
               <>
