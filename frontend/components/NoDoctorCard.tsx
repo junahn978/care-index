@@ -14,7 +14,6 @@ export default function NoDoctorCards({
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showSpinner, setShowSpinner] = useState(false);
 
   return (
     // max-w: full width on phones, 37.5rem at most; the top margin shrinks on short screens
@@ -44,8 +43,6 @@ export default function NoDoctorCards({
             <AddDoctorCard
               setDoctorCards={setDoctorCards}
               setIsDialogOpen={setIsDialogOpen}
-              showSpinner={showSpinner}
-              setShowSpinner={setShowSpinner}
             ></AddDoctorCard>
           </DialogContent>
         </form>
