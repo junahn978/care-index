@@ -286,7 +286,10 @@ export default function EditDoctorCard({
             <h3 className="text-fluid-sm font-semibold tracking-wide text-muted-foreground">
               OFFICE LOCATION
             </h3>
-            <div className="grid grid-cols-2 gap-4 tablet:grid-cols-4">
+            {/* one column on the narrowest phones, two from 360px and four from tablet up. The
+                column Country sits in is never narrower than 10rem, enough for "Select a
+                country" on one line beside the inputs; the other columns share the rest */}
+            <div className="grid grid-cols-1 gap-4 min-[22.5rem]:grid-cols-[minmax(0,1fr)_minmax(10rem,1fr)] tablet:grid-cols-[repeat(3,minmax(0,1fr))_minmax(10rem,1fr)]">
               <Controller
                 name="streetAddress1"
                 control={form.control}
@@ -409,9 +412,14 @@ export default function EditDoctorCard({
                         render={
                           <Button
                             variant="outline"
-                            className="flex h-auto min-h-8 justify-between text-left whitespace-normal"
+                            className="flex justify-between text-left"
                           >
-                            {field.value || "Select a country"} <ChevronDown />
+                            {/* one line at the inputs' height; cut off with "…" rather than
+                                wrapping if it ever doesn't fit the column */}
+                            <span className="truncate">
+                              {field.value || "Select a country"}
+                            </span>
+                            <ChevronDown />
                           </Button>
                         }
                       />
