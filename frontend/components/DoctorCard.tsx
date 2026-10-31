@@ -55,9 +55,12 @@ function toMapsHref(card: DoctorCardData) {
 
 export default function DoctorCard({
   setDoctorCards,
+  savedSpecialties,
   ...card
 }: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
+  // for the Specialty dropdown in the edit form
+  savedSpecialties: string[];
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -239,6 +242,7 @@ export default function DoctorCard({
                 {...card}
                 setDoctorCards={setDoctorCards}
                 setIsDialogOpen={setIsDialogOpen}
+                savedSpecialties={savedSpecialties}
               ></EditDoctorCard>
             </DialogContent>
           </form>

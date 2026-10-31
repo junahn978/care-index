@@ -41,6 +41,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { formatPhone, phoneFieldPattern } from "@/lib/phone";
 import PhoneInput from "./PhoneInput";
+import SpecialtySelect from "./SpecialtySelect";
 
 // defining the zod schema for client input validation
 const formSchema = z.object({
@@ -97,10 +98,13 @@ const formSchema = z.object({
 export default function EditDoctorCard({
   setDoctorCards,
   setIsDialogOpen,
+  savedSpecialties,
   ...card
 }: DoctorCardData & {
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
+  // offered in the Specialty dropdown along with the defaults
+  savedSpecialties: string[];
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -203,12 +207,10 @@ export default function EditDoctorCard({
                     <FieldLabel htmlFor="form-rhf-demo-title">
                       Specialty <span className="text-destructive">*</span>
                     </FieldLabel>
-                    <Input
+                    <SpecialtySelect
                       {...field}
-                      id="form-rhf-demo-title"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="e.g. Cardiology"
-                      autoComplete="off"
+                      invalid={fieldState.invalid}
+                      savedSpecialties={savedSpecialties}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />

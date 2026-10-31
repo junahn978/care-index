@@ -19,6 +19,8 @@ export default function DisplayDoctorCard({
   setDoctorCards: Dispatch<SetStateAction<DoctorCardData[]>>;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // every card's specialty, so custom ones are offered in the Specialty dropdowns too
+  const savedSpecialties = doctorCards.map((card) => card.specialty);
 
   return (
     <div>
@@ -50,6 +52,7 @@ export default function DisplayDoctorCard({
               <AddDoctorCard
                 setDoctorCards={setDoctorCards}
                 setIsDialogOpen={setIsDialogOpen}
+                savedSpecialties={savedSpecialties}
               ></AddDoctorCard>
             </DialogContent>
           </form>
@@ -62,6 +65,7 @@ export default function DisplayDoctorCard({
             key={doctorCards.doctorName}
             {...doctorCards}
             setDoctorCards={setDoctorCards}
+            savedSpecialties={savedSpecialties}
           />
         ))}
       </div>
