@@ -18,10 +18,11 @@ def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: UUID) ->
 
     return new_card
 
-# get doctor card by card_id
+# get doctor card by card_id, only if it belongs to user_id. Another user's card returns None,
+# same as a missing card, so the routes answer 404 and don't reveal which card ids exist
 def retrieve_doctor_card(db: Session, card_id: int, user_id: UUID) -> DoctorCard | None:
     
-    query = select(DoctorCard).where(DoctorCard.card_id == card_id)
+    query = select(DoctorCard).where(DoctorCard.card_id == card_id, DoctorCard.user_id == user_id)
     result = db.execute(query)
     response = result.scalar_one_or_none()
     
@@ -34,10 +35,10 @@ def retrieve_all_doctor_card(db: Session, user_id:UUID) -> list[DoctorCard]:
     return list(response)
 
 def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate, user_id:UUID) -> DoctorCard | None:
-    # fetch exsisting matching card_id
-    card = db.get(DoctorCard, card_id)
+    # fetch exsisting matching card_id that belongs to user_id
+    card = retrieve_doctor_card(db, card_id, user_id)
 
-    # card does not exsist, return none, exit early
+    # card does not exsist or belongs to another user, return none, exit early
     if card is None: 
         return None
     
@@ -54,7 +55,8 @@ def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate,
 
 def remove_doctor_card(db:Session, card_id:int, user_id:UUID)-> bool:
     
-    doctor_card = db.get(DoctorCard, card_id)
+    # only a card that belongs to user_id can be deleted
+    doctor_card = retrieve_doctor_card(db, card_id, user_id)
 
     if doctor_card:
         db.delete(doctor_card)
