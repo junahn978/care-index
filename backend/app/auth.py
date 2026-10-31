@@ -2,9 +2,8 @@ import jwt
 from uuid import UUID
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from backend.app.config import SUPABASE_URL
+from backend.app.config import SUPABASE_URL, ALLOWED_EMAILS
 
-allowable_list = ["junahn45@gmail.com"]
 SUPABASE_ISSUER = f"{SUPABASE_URL}/auth/v1"
 
 jwks_client = jwt.PyJWKClient(f"{SUPABASE_ISSUER}/.well-known/jwks.json")
@@ -31,4 +30,11 @@ def verify_access_token(token: str):
 
 def get_current_user_id(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> UUID: 
     payload = verify_access_token(creds.credentials)
+
+    # a valid token isn't enough, the email it was issued to must be on the allowlist.
+    # Every route gets the user through here, so this protects all of them
+    email = (payload.get("email") or "").lower()
+    if email not in ALLOWED_EMAILS:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authorized")
+
     return UUID(payload["sub"])
