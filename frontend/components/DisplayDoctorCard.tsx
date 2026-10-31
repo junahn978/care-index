@@ -58,8 +58,8 @@ export default function DisplayDoctorCard({
           </form>
         </Dialog>
       </div>
-      {/* 4 columns on large monitors, 3 on laptops, collapsing to 2 on tablets and phones */}
-      <div className="grid grid-cols-2 gap-3 my-6 tablet:gap-5 tablet:my-10 laptop:grid-cols-3 desktop:grid-cols-4">
+      {/* 3 columns on laptops and large monitors, collapsing to 2 on tablets and phones */}
+      <div className="grid grid-cols-2 gap-3 my-6 tablet:gap-5 tablet:my-10 laptop:grid-cols-3">
         {doctorCards.map((doctorCards) => (
           <DoctorCard
             key={doctorCards.doctorName}
