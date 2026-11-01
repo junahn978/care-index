@@ -32,9 +32,10 @@ def get_current_user_id(creds: HTTPAuthorizationCredentials = Depends(bearer)) -
     payload = verify_access_token(creds.credentials)
 
     # a valid token isn't enough, the email it was issued to must be on the allowlist.
-    # Every route gets the user through here, so this protects all of them
+    # Every route gets the user through here, so this protects all of them.
+    # 403, not 401: the user is signed in, just not allowed, and the frontend shows "access denied" for it
     email = (payload.get("email") or "").lower()
     if email not in ALLOWED_EMAILS:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authorized")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not authorized")
 
     return UUID(payload["sub"])

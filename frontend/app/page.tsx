@@ -6,12 +6,14 @@ import { Spinner } from "@/components/ui/spinner";
 import DisplayDoctorCard from "@/components/DisplayDoctorCard";
 import NoDoctorCards from "@/components/NoDoctorCard";
 import Header from "@/components/Header";
-import { getDoctorCards } from "@/lib/api/doctor-cards";
+import AccessDenied from "@/components/AccessDenied";
+import { getDoctorCards, AccessDeniedError } from "@/lib/api/doctor-cards";
 import { DoctorCardData } from "@/lib/types";
 
 export default function Home() {
   const [doctorCards, setDoctorCards] = useState<DoctorCardData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAccessDenied, setIsAccessDenied] = useState(false);
 
   useEffect(() => {
     const fetchDoctorCards = async () => {
@@ -19,6 +21,11 @@ export default function Home() {
         const response: DoctorCardData[] = await getDoctorCards();
         setDoctorCards(response);
       } catch (error) {
+        // signed in, but the email isn't on the allowlist
+        if (error instanceof AccessDeniedError) {
+          setIsAccessDenied(true);
+          return;
+        }
         console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
@@ -66,6 +73,8 @@ export default function Home() {
               </span>
             </p>
           </div>
+        ) : isAccessDenied ? (
+          <AccessDenied />
         ) : doctorCards.length > 0 ? (
           <DisplayDoctorCard
             doctorCount={doctorCards.length}

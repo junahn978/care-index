@@ -4,6 +4,9 @@ import createClient from "../supabase";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const supabase = createClient();
 
+// thrown when the backend answers 403: the user is signed in, but their email isn't on the allowlist
+export class AccessDeniedError extends Error {}
+
 // Shape of a card as the FastAPI backend sends it
 type ApiDoctorCardResponse = {
   card_id: number;
@@ -95,6 +98,9 @@ export async function getDoctorCards(): Promise<DoctorCardData[]> {
   const response = await fetch(url, {
     headers: { ...(await authHeaders()) },
   });
+  if (response.status === 403) {
+    throw new AccessDeniedError("Access denied");
+  }
   if (!response.ok) {
     throw new Error(`Response status: ${response.status}`);
   }
