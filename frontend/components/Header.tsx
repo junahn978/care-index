@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -71,6 +71,12 @@ export default function Header() {
           <DropdownMenuContent className="w-40" align="end">
             <DropdownMenuItem className="cursor-pointer">
               <User /> View profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => router.push("/delegation")}
+            >
+              <Users /> Delegations
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
