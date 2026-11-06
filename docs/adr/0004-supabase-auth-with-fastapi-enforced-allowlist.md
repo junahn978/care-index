@@ -7,3 +7,8 @@ Members sign in with Google (OAuth) or a Supabase magic link as a fallback; Next
 - Sign-in happens between the browser and Supabase, so an uninvited person who signs in still gets a Supabase auth record; they just can't read or write anything. We keep it that way deliberately: those records are part of the audit trail. (Blocking creation would need a Supabase "before user created" hook.)
 - Every rejected request is also written to an `access_denied` table (email, Supabase user ID, time, IP, user agent, path), because Supabase's own records say who signed in but not what they tried or from where.
 - Adding a family member (or later, friends) is a row insert, not a redeploy.
+
+## Changed by ADR 0007
+
+- The Allowlist is no longer the only way in: someone not on it who has accepted a Delegation can reach the Doctor Cards shared with them, and nothing else.
+- A Suspended account gets 403 "Account suspended" even if its email is on the Allowlist.
