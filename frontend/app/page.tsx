@@ -7,6 +7,7 @@ import DisplayDoctorCard from "@/components/DisplayDoctorCard";
 import NoDoctorCards from "@/components/NoDoctorCard";
 import Header from "@/components/Header";
 import AccessDenied from "@/components/AccessDenied";
+import LoadError from "@/components/LoadError";
 import { getDoctorCards, AccessDeniedError } from "@/lib/api/doctor-cards";
 import { DoctorCardData } from "@/lib/types";
 
@@ -14,24 +15,39 @@ export default function Home() {
   const [doctorCards, setDoctorCards] = useState<DoctorCardData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAccessDenied, setIsAccessDenied] = useState(false);
+  const [isLoadFailed, setIsLoadFailed] = useState(false);
 
   useEffect(() => {
+    // React runs this effect twice in development. Only the latest run may update the page,
+    // so a request from the first run that finishes first (or fails) can't flash the wrong screen
+    let ignore = false;
+
     const fetchDoctorCards = async () => {
       try {
         const response: DoctorCardData[] = await getDoctorCards();
+        if (ignore) return;
         setDoctorCards(response);
+        // this run can succeed where an earlier one failed, e.g. when navigating back to the page
+        setIsLoadFailed(false);
       } catch (error) {
+        if (ignore) return;
         // signed in, but the email isn't on the allowlist
         if (error instanceof AccessDeniedError) {
           setIsAccessDenied(true);
           return;
         }
         console.error("Error fetching data:", error);
+        // not the empty state: failing to load the cards doesn't mean there are none
+        setIsLoadFailed(true);
       } finally {
-        setIsLoading(false);
+        if (!ignore) setIsLoading(false);
       }
     };
     fetchDoctorCards();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -75,6 +91,8 @@ export default function Home() {
           </div>
         ) : isAccessDenied ? (
           <AccessDenied />
+        ) : isLoadFailed ? (
+          <LoadError />
         ) : doctorCards.length > 0 ? (
           <DisplayDoctorCard
             doctorCount={doctorCards.length}
