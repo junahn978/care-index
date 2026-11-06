@@ -1,3 +1,7 @@
+---
+status: superseded by ADR-0007
+---
+
 # Owner-controlled Shares instead of a Household
 
 Every Doctor Card and Insurance Plan still has exactly one Owner, but an Owner can create a Share giving another Member (picked by email) access to their Doctor Cards, Insurance Plans, or both, at View or Edit level. Shares take effect immediately with no acceptance step and the Owner can revoke them at any time. We rejected a shared family list and an everyone-sees-everything Household because both break down once friends join; with Shares nothing is visible to anyone unless its Owner chose to share it.

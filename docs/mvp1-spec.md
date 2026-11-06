@@ -6,6 +6,8 @@ Terms in **bold** are defined in [`CONTEXT.md`](../CONTEXT.md). Decisions with r
 
 A private, invite-only web app (installable as a PWA) where each **Member** keeps their **Doctor Cards** and **Insurance Plans**, and can **Share** them with family. Audience: the author, their parents and sister. $0 to run.
 
+> **Out of date on sharing:** the Shares in this spec follow ADR 0006, which [ADR 0007](./adr/0007-delegations-by-invitation-and-admins-without-data-access.md) replaces with Delegations, Invitations, Admins, Suspension, the Audit Log and the Trash. Where they disagree, ADR 0007 wins.
+
 ## Stack
 
 | Layer           | Choice                                                                                                |
