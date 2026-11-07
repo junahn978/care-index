@@ -57,8 +57,11 @@ export default function Header() {
             height={160}
           />
         </Link>
+        {/* goes to the doctor cards page, same as the logo */}
         <Button
           size="xxl"
+          nativeButton={false}
+          render={<Link href="/" />}
           className="h-auto min-h-10 py-2 text-center whitespace-normal [grid-area:nav] tablet:min-h-12"
         >
           My Care Team / Doctors
