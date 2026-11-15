@@ -1,4 +1,5 @@
 import jwt
+from dataclasses import dataclass
 from uuid import UUID
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -32,19 +33,43 @@ def verify_access_token(token: str):
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
 
-def get_current_user_id(creds: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)) -> UUID:
+# the signed-in person, as routes (and later can()) see them.
+# Frozen and separate from the AppUser row, so a route can't flip is_admin by assigning to it and committing
+@dataclass(frozen=True)
+class CurrentUser:
+    id: UUID
+    email: str
+    is_admin: bool
+    is_suspended: bool
+    is_allowlisted: bool
+
+def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)) -> CurrentUser:
     payload = verify_access_token(creds.credentials)
+
+    # the token's email, not app_users.email: the token is what Supabase just vouched for.
+    # Looked up on every request and never stored, so removing an email from allowed_emails takes effect on the next request
+    email = (payload.get("email") or "").lower()
+    is_allowlisted = is_email_allowed(db, email)
 
     # a valid token isn't enough, the email it was issued to must be in the allowed_emails table.
     # Every route gets the user through here, so this protects all of them.
     # 403, not 401: the user is signed in, just not allowed, and the frontend shows "access denied" for it
-    email = (payload.get("email") or "").lower()
-    if not is_email_allowed(db, email):
+    if not is_allowlisted:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not authorized")
 
     # FastAPI never sees the sign-in itself, so the first request after it creates the app_users row.
     # get_db is cached per request, so this is the same session the route gets
     user_id = UUID(payload["sub"])
-    get_or_create_app_user(db, user_id, email)
+    app_user = get_or_create_app_user(db, user_id, email)
 
-    return user_id
+    # checked here, before any route runs, so no route can forget it (ADR 0007)
+    if app_user.is_suspended:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account suspended")
+
+    return CurrentUser(
+        id=user_id,
+        email=email,
+        is_admin=app_user.is_admin,
+        is_suspended=app_user.is_suspended,
+        is_allowlisted=is_allowlisted,
+    )
