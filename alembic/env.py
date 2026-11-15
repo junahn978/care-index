@@ -9,6 +9,7 @@ from backend.app.models.base import Base
 # importing each model registers its table on Base.metadata, which is what autogenerate compares against the database
 from backend.app.models.doctor_card import DoctorCard
 from backend.app.models.app_user import AppUser
+from backend.app.models.allowed_email import AllowedEmail
 
 import os
 from dotenv import load_dotenv
