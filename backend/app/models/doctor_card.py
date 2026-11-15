@@ -1,11 +1,9 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import CheckConstraint, func, DateTime, String, ForeignKey, Uuid
 from datetime import datetime
 from typing import Optional
 import uuid
-
-class Base(DeclarativeBase):
-    pass
+from backend.app.models.base import Base
 
 class AddressMixin:
     street_address_1: Mapped[str] = mapped_column(String(150))
