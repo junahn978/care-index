@@ -2,7 +2,10 @@ import jwt
 from uuid import UUID
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
 from backend.app.config import SUPABASE_URL, ALLOWED_EMAILS
+from backend.app.db import get_db
+from backend.app.services.app_user import get_or_create_app_user
 
 SUPABASE_ISSUER = f"{SUPABASE_URL}/auth/v1"
 
@@ -28,7 +31,7 @@ def verify_access_token(token: str):
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
 
-def get_current_user_id(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> UUID: 
+def get_current_user_id(creds: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)) -> UUID:
     payload = verify_access_token(creds.credentials)
 
     # a valid token isn't enough, the email it was issued to must be on the allowlist.
@@ -38,4 +41,9 @@ def get_current_user_id(creds: HTTPAuthorizationCredentials = Depends(bearer)) -
     if email not in ALLOWED_EMAILS:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not authorized")
 
-    return UUID(payload["sub"])
+    # FastAPI never sees the sign-in itself, so the first request after it creates the app_users row.
+    # get_db is cached per request, so this is the same session the route gets
+    user_id = UUID(payload["sub"])
+    get_or_create_app_user(db, user_id, email)
+
+    return user_id
