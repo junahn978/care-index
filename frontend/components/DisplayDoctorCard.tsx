@@ -60,10 +60,10 @@ export default function DisplayDoctorCard({
       </div>
       {/* 3 columns on laptops and large monitors, collapsing to 2 on tablets and phones */}
       <div className="grid grid-cols-2 gap-3 my-6 tablet:gap-5 tablet:my-10 laptop:grid-cols-3">
-        {doctorCards.map((doctorCards) => (
+        {doctorCards.map((card) => (
           <DoctorCard
-            key={doctorCards.doctorName}
-            {...doctorCards}
+            key={card.cardId}
+            {...card}
             setDoctorCards={setDoctorCards}
             savedSpecialties={savedSpecialties}
           />
