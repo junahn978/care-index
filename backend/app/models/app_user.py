@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, String, Uuid, func, text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Uuid, func, text
 from datetime import datetime
 import uuid
 from backend.app.models.base import Base
@@ -8,7 +8,6 @@ class AppUser(Base):
     __tablename__ = "app_users"
 
     __table_args__ = (
-        CheckConstraint("status IN ('active', 'suspended')", name="check_app_users_status"),
         # emails compare case-insensitively, so uniqueness is on lower(email), not email
         Index("index_app_users_lower_email", text("lower(email)"), unique=True),
     )
@@ -23,7 +22,8 @@ class AppUser(Base):
     email: Mapped[str] = mapped_column(String(254), nullable=False)
     # set directly in the database, never through the app (ADR 0007)
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
-    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default=text("'active'"))
+    # set by an Admin. A Suspended person gets 403 on every route (ADR 0007)
+    is_suspended: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
