@@ -1,11 +1,8 @@
 import { DoctorCardData, NewDoctorCardData } from "../types";
-import createClient from "../supabase";
+import { authHeaders } from "./auth-headers";
+import { forbiddenError } from "./errors";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const supabase = createClient();
-
-// thrown when the backend answers 403: the user is signed in, but their email isn't on the allowlist
-export class AccessDeniedError extends Error {}
 
 // Shape of a card as the FastAPI backend sends it
 type ApiDoctorCardResponse = {
@@ -78,20 +75,6 @@ function convertToDoctorCardDataBackend(doctorCard: NewDoctorCardData) {
   return doctorCardData;
 }
 
-async function authHeaders() {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-
-  if (error) {
-    console.error("Error fetching session:", error.message);
-  }
-
-  const token = session?.access_token;
-  return { Authorization: `Bearer ${token}` };
-}
-
 export async function getDoctorCards(): Promise<DoctorCardData[]> {
   const url = `${API_URL}/doctor-card/`;
 
@@ -99,7 +82,7 @@ export async function getDoctorCards(): Promise<DoctorCardData[]> {
     headers: { ...(await authHeaders()) },
   });
   if (response.status === 403) {
-    throw new AccessDeniedError("Access denied");
+    throw await forbiddenError(response);
   }
   if (!response.ok) {
     throw new Error(`Response status: ${response.status}`);
