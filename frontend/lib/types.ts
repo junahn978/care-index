@@ -16,6 +16,9 @@ export type DoctorCardData = {
 
 export type NewDoctorCardData = Omit<DoctorCardData, "cardId">;
 
+// the signed-in person, from GET /me
+export type Me = { isAdmin: boolean };
+
 // who a delegate is to the user, picked when inviting them
 export type DelegateRelationship = "Family" | "Primary Care";
 
