@@ -53,9 +53,10 @@ def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: 
 
     # a valid token isn't enough, the email it was issued to must be in the allowed_emails table.
     # Every route gets the user through here, so this protects all of them.
-    # 403, not 401: the user is signed in, just not allowed, and the frontend shows "access denied" for it
+    # 403, not 401: the user is signed in, just not allowed, and the frontend shows "access denied" for it.
+    # Both 403s here carry a stable code, so the frontend can tell them apart without matching the message text
     if not is_allowlisted:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not authorized")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, {"code": "not_on_allowlist", "message": "Not authorized"})
 
     # FastAPI never sees the sign-in itself, so the first request after it creates the app_users row.
     # get_db is cached per request, so this is the same session the route gets
@@ -64,7 +65,7 @@ def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: 
 
     # checked here, before any route runs, so no route can forget it (ADR 0007)
     if app_user.is_suspended:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account suspended")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, {"code": "account_suspended", "message": "Account suspended"})
 
     return CurrentUser(
         id=user_id,
