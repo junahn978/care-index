@@ -62,10 +62,13 @@ export default function HomePage() {
     console.log(doctorCards);
   }, [doctorCards]);
 
+  // same as MeGate: a blocked person can't use anything the Header links to
+  const isBlocked = isSuspended || isAccessDenied;
+
   return (
     // flex-1: fill the screen height so the loader can sit in the middle of the space below the header
     <div className="flex flex-1 flex-col">
-      <Header />
+      {!isBlocked && <Header />}
       <main
         className={cn(
           "page-container",
