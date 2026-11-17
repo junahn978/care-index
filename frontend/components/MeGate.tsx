@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import LoadingData from "@/components/LoadingData";
 import AccessDenied from "@/components/AccessDenied";
 import AccountSuspended from "@/components/AccountSuspended";
-import LoadError from "@/components/LoadError";
+import AccountCheckError from "@/components/AccountCheckError";
 import { getMe } from "@/lib/api/me";
 import { AccessDeniedError, AccountSuspendedError } from "@/lib/api/errors";
 import { Me } from "@/lib/types";
@@ -15,7 +15,7 @@ type MeState =
   | { status: "loading" }
   | { status: "suspended" }
   | { status: "accessDenied" }
-  | { status: "loadFailed" }
+  | { status: "checkFailed" }
   | { status: "ready"; me: Me };
 
 const MeContext = createContext<Me | null>(null);
@@ -57,7 +57,10 @@ export default function MeGate({ children }: { children: React.ReactNode }) {
           return;
         }
         console.error("Error fetching the signed-in user:", error);
-        setState({ status: "loadFailed" });
+        // no response (the backend is down or the Wi-Fi dropped), 502/503/504 while the backend
+        // restarts, or 404 when the frontend went live before the backend had /me. Anything else
+        // lands here too, since trying again is the next step for all of them
+        setState({ status: "checkFailed" });
       }
     };
     fetchMe();
@@ -94,7 +97,7 @@ export default function MeGate({ children }: { children: React.ReactNode }) {
         ) : state.status === "accessDenied" ? (
           <AccessDenied />
         ) : (
-          <LoadError />
+          <AccountCheckError />
         )}
       </main>
     </div>
