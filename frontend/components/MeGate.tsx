@@ -72,11 +72,15 @@ export default function MeGate({ children }: { children: React.ReactNode }) {
   }
 
   const isLoading = state.status === "loading";
+  // a Suspended person, or one not on the Allowlist, can't use anything the Header links to,
+  // so those screens show on their own
+  const isBlocked =
+    state.status === "suspended" || state.status === "accessDenied";
 
   return (
     // the same shell as the pages, so the loader sits in the same spot when the page takes over
     <div className="flex flex-1 flex-col">
-      <Header />
+      {!isBlocked && <Header />}
       <main
         className={cn(
           "page-container",
