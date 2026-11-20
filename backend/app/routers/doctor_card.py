@@ -27,7 +27,7 @@ def post_doctor_card(card: DoctorCardCreate, db: Session = Depends(get_db), user
     if not can(user, "add", user.id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
-    response = create_doctor_card(db, card, user.id)
+    response = create_doctor_card(db, card, user.id, user)
     return response
 
 # get card by card_id function
@@ -75,7 +75,7 @@ def patch_doctor_card(card_id: int, card: DoctorCardUpdate, db:Session = Depends
     if doctor_card is None or not can(user, "edit", doctor_card.user_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"card ID: {card_id} not found")
 
-    response = update_doctor_card(db, doctor_card, card)
+    response = update_doctor_card(db, doctor_card, card, user)
     return response
 
 # delete doctor card
@@ -90,4 +90,4 @@ def delete_doctor_card(card_id: int, db: Session = Depends(get_db), user: Curren
     if doctor_card is None or not can(user, "delete", doctor_card.user_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"card ID: {card_id} not found")
 
-    remove_doctor_card(db, doctor_card)
+    remove_doctor_card(db, doctor_card, user)
