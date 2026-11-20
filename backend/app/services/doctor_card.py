@@ -18,11 +18,11 @@ def create_doctor_card(db: Session, card_in: DoctorCardCreate, user_id: UUID) ->
 
     return new_card
 
-# get doctor card by card_id, only if it belongs to user_id. Another user's card returns None,
-# same as a missing card, so the routes answer 404 and don't reveal which card ids exist
-def retrieve_doctor_card(db: Session, card_id: int, user_id: UUID) -> DoctorCard | None:
-    
-    query = select(DoctorCard).where(DoctorCard.card_id == card_id, DoctorCard.user_id == user_id)
+# get doctor card by card_id, whoever owns it. Who may see it is can()'s decision, not this query's,
+# so every caller must ask can() before using the card
+def retrieve_doctor_card(db: Session, card_id: int) -> DoctorCard | None:
+
+    query = select(DoctorCard).where(DoctorCard.card_id == card_id)
     result = db.execute(query)
     response = result.scalar_one_or_none()
     
@@ -34,14 +34,8 @@ def retrieve_all_doctor_card(db: Session, user_id:UUID) -> list[DoctorCard]:
     response = db.scalars(statement).all()
     return list(response)
 
-def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate, user_id:UUID) -> DoctorCard | None:
-    # fetch exsisting matching card_id that belongs to user_id
-    card = retrieve_doctor_card(db, card_id, user_id)
-
-    # card does not exsist or belongs to another user, return none, exit early
-    if card is None: 
-        return None
-    
+# takes the card the route already loaded and checked with can(), so the card checked is the card edited
+def update_doctor_card(db: Session, card: DoctorCard, card_update: DoctorCardUpdate) -> DoctorCard:
     #extract only the fields user changed
     update_data = card_update.model_dump(exclude_unset=True)
 
@@ -53,15 +47,7 @@ def update_doctor_card(db: Session, card_id: int, card_update: DoctorCardUpdate,
 
     return card
 
-def remove_doctor_card(db:Session, card_id:int, user_id:UUID)-> bool:
-    
-    # only a card that belongs to user_id can be deleted
-    doctor_card = retrieve_doctor_card(db, card_id, user_id)
-
-    if doctor_card:
-        db.delete(doctor_card)
-        db.commit()
-        return True
-    else: return False
-    
-    
+# same as update: deletes the card the route already checked with can()
+def remove_doctor_card(db:Session, doctor_card: DoctorCard) -> None:
+    db.delete(doctor_card)
+    db.commit()
