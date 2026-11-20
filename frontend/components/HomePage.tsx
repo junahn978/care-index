@@ -62,7 +62,8 @@ export default function HomePage() {
     console.log(doctorCards);
   }, [doctorCards]);
 
-  // same as MeGate: a blocked person can't use anything the Header links to
+  // the Header can show while the cards load because /me already passed. A Suspended person, or
+  // one not on the Allowlist, can't use anything it links to, so those screens show on their own
   const isBlocked = isSuspended || isAccessDenied;
 
   return (

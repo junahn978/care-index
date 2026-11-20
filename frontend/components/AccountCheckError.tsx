@@ -1,10 +1,22 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { CloudAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import createClient from "@/lib/supabase";
+
+const supabase = createClient();
 
 // shown when /me fails, so the app can't tell who's signed in
 export default function AccountCheckError() {
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+    router.replace("/login");
+  };
+
   return (
     // same card as the empty state: full width on phones, 37.5rem at most
     <div
@@ -16,9 +28,13 @@ export default function AccountCheckError() {
         Sorry, we couldn’t check your account
       </h1>
       <p className="mt-3 text-pretty">Please try again.</p>
-      <Button className="mt-3 mb-8" onClick={() => window.location.reload()}>
-        Try again
-      </Button>
+      <div className="mt-3 mb-8 flex flex-wrap justify-center gap-2">
+        <Button onClick={() => window.location.reload()}>Try again</Button>
+        {/* the Header, with its own Sign out, stays hidden until /me answers yes */}
+        <Button variant="outline" onClick={handleSignOut}>
+          Sign out
+        </Button>
+      </div>
     </div>
   );
 }

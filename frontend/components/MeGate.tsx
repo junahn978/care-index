@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { cn } from "cn";
-import Header from "@/components/Header";
 import LoadingData from "@/components/LoadingData";
 import AccessDenied from "@/components/AccessDenied";
 import AccountSuspended from "@/components/AccountSuspended";
@@ -75,31 +74,26 @@ export default function MeGate({ children }: { children: React.ReactNode }) {
   }
 
   const isLoading = state.status === "loading";
-  // a Suspended person, or one not on the Allowlist, can't use anything the Header links to,
-  // so those screens show on their own
-  const isBlocked =
-    state.status === "suspended" || state.status === "accessDenied";
 
+  // no Header on any of these screens: until /me says yes, the name it shows could belong to
+  // someone who isn't allowed in. Each page brings its own Header, so it first appears with them
   return (
-    // the same shell as the pages, so the loader sits in the same spot when the page takes over
-    <div className="flex flex-1 flex-col">
-      {!isBlocked && <Header />}
-      <main
-        className={cn(
-          "page-container",
-          isLoading ? "flex flex-1 items-center justify-center" : "pb-10",
-        )}
-      >
-        {isLoading ? (
-          <LoadingData />
-        ) : state.status === "suspended" ? (
-          <AccountSuspended />
-        ) : state.status === "accessDenied" ? (
-          <AccessDenied />
-        ) : (
-          <AccountCheckError />
-        )}
-      </main>
-    </div>
+    // flex-1 while loading: fill the screen height so the loader can sit in the middle of it
+    <main
+      className={cn(
+        "page-container",
+        isLoading ? "flex flex-1 items-center justify-center" : "pb-10",
+      )}
+    >
+      {isLoading ? (
+        <LoadingData />
+      ) : state.status === "suspended" ? (
+        <AccountSuspended />
+      ) : state.status === "accessDenied" ? (
+        <AccessDenied />
+      ) : (
+        <AccountCheckError />
+      )}
+    </main>
   );
 }
