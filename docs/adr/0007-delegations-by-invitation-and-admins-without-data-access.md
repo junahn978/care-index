@@ -54,7 +54,8 @@ Doctor Cards hold medical information, so the only ways to reach one are to be i
 
 ### Audit Log
 
-- Every Delegate action (viewing a list, viewing, adding, editing, deleting or restoring a card), every Admin action, and every Delegation and Invitation change is logged with who did it, whose card it was, which card, and when.
+- Every change to a Doctor Card (adding, editing, deleting or restoring, by its Owner or a Delegate), every Delegate view (a list or a card), every Admin action, and every Delegation and Invitation change is logged with who did it, whose card it was, which card, and when. An Owner viewing their own cards isn't logged: it would add a row on every page load, and the changes are what show what someone did with a taken-over account, or answer a Member asking who deleted a card ("you did, on Nov 3").
+- An edit is logged with the names of the fields that changed, never their old or new values. The log outlives deleted cards and accounts, so values in it would keep a person's medical details after they deleted them. It can show what was touched, but it can't give back an old value.
 - The log is append-only: the app can only add rows, and a database trigger rejects any change or delete. Entries store plain ids and emails rather than links that would delete them along with a person or card. Someone with full database access could still alter it; preventing that would mean sending the log to an outside service.
 
 ### Trash

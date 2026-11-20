@@ -74,7 +74,7 @@ The state of an account an Admin has frozen: its holder reaches neither their ow
 _Avoid_: Banned, disabled, locked
 
 **Audit Log**:
-The permanent, append-only record of what Delegates and Admins did and of every Delegation and Invitation change.
+The permanent, append-only record of every change to a Doctor Card, of what Delegates and Admins did, and of every Delegation and Invitation change.
 _Avoid_: History, activity feed
 
 **Trash**:
