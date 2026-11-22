@@ -11,6 +11,7 @@ from backend.app.models.doctor_card import DoctorCard
 from backend.app.models.app_user import AppUser
 from backend.app.models.allowed_email import AllowedEmail
 from backend.app.models.audit_log import AuditLog
+from backend.app.models.invitation import Invitation
 
 import os
 from dotenv import load_dotenv
