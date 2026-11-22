@@ -9,6 +9,7 @@ Doctor Cards hold medical information, so the only ways to reach one are to be i
 - **Deleting compromised accounts.** Rejected as the default: deleting destroys a real person's records. Admins suspend instead; deletion exists but needs a reason.
 - **Roles and Delegations inside the sign-in token.** Rejected: a token lives about an hour, so a revoked Delegate would keep access until it expired. FastAPI reads them from the database on every request.
 - **403 for cards outside your access.** Rejected: it confirms the card exists. Card ids are sequential, so it would let someone map which ids are real.
+- **Giving the Owner the link to copy and send.** Rejected: the app has its own sending domain, so Resend can email the link directly, and a link in the Owner's hands is one more place the token can leak or go to the wrong person. Emailing after answering the Owner was rejected too: they'd be told "sent" before anyone knew whether it was.
 
 ## Consequences
 
@@ -39,9 +40,10 @@ Doctor Cards hold medical information, so the only ways to reach one are to be i
 
 ### Invitations
 
-- The Owner's Invitation names one email and an Access Level. FastAPI makes a random single-use token, stores only its hash, and returns a link with the raw token, which the Owner copies and sends. Emailing it through Resend comes later.
+- The Owner's Invitation names one email and an Access Level. FastAPI makes a random single-use token, stores only its hash, and emails a link with the raw token to that address through Resend, from `delegations@mail.careindexapp.com`. The Owner never sees or copies the link.
+- The Invitation is saved only after Resend accepts the email, so the Owner is told it was sent only when it was. If Resend refuses it, nothing is saved and they can send it again. "Sent" means Resend took the email, not that it reached the inbox.
 - Accepting needs someone signed in (Google or magic link) with the invited email, a token that is unused and under 7 days old, and neither the Owner nor the invitee Suspended. A failed accept gives one generic "invalid or expired" answer.
-- Resending makes a new token and kills the old one. Cancelling kills the Invitation, and revoking a Delegate also kills any pending Invitation to them.
+- Resending makes a new token, emails a new link and kills the old one. If that email fails, nothing changes and the old link still works. Cancelling kills the Invitation, and revoking a Delegate also kills any pending Invitation to them.
 - Nobody can invite themselves, Admins included, nor someone who already holds a Delegation from them. Suspended Members can't send Invitations.
 
 ### Suspension and Admins
