@@ -6,7 +6,10 @@ from backend.app.models.audit_log import AuditLog
 
 # every action the Audit Log records, the same list as the CHECK constraint on audit_log.action.
 # Rows can never be corrected, so a wrong action name is refused instead of kept forever
-AuditAction = Literal["add_card", "edit_card", "delete_card"]
+AuditAction = Literal[
+    "add_card", "edit_card", "delete_card",
+    "send_invitation", "resend_invitation", "cancel_invitation", "accept_invitation",
+]
 
 
 # adds one Audit Log entry to the caller's transaction. It never flushes or commits: the caller's single
