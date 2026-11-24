@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from backend.app.routers.doctor_card import router as doctor_card_router
+from backend.app.routers.invitation import router as invitation_router
 from backend.app.routers.me import router as me_router
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -7,6 +8,7 @@ app = FastAPI()
 
 # mount the routers
 app.include_router(doctor_card_router)
+app.include_router(invitation_router)
 app.include_router(me_router)
 
 origins = [
