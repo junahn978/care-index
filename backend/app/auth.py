@@ -39,9 +39,20 @@ def verify_access_token(token: str):
 class CurrentUser:
     id: UUID
     email: str
+    # their full name from the sign-in token, or None if they have none. Shown to other people, such as in an
+    # Invitation email, and always next to their email, since they can set it to anything
+    full_name: str | None
     is_admin: bool
     is_suspended: bool
     is_allowlisted: bool
+
+# the full name in the token's user_metadata (from Google, or the sign-up form) with its whitespace tidied, or None
+# when it's missing or blank. The person can set user_metadata to anything, so a full name that isn't text counts
+# as missing, and it's only ever shown to people, never used to decide access
+def full_name_from(payload: dict) -> str | None:
+    full_name = (payload.get("user_metadata") or {}).get("full_name")
+    tidied = " ".join(full_name.split()) if isinstance(full_name, str) else ""
+    return tidied or None
 
 def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)) -> CurrentUser:
     payload = verify_access_token(creds.credentials)
@@ -70,6 +81,7 @@ def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: 
     return CurrentUser(
         id=user_id,
         email=email,
+        full_name=full_name_from(payload),
         is_admin=app_user.is_admin,
         is_suspended=app_user.is_suspended,
         is_allowlisted=is_allowlisted,
