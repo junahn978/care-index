@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from backend.app.auth import CurrentUser, get_current_user
 from backend.app.authorization import can
 from backend.app.db import get_db
-from backend.app.schemas.invitations import InvitationCreate, InvitationResponse
-from backend.app.services.invitation import PendingInvitationExists, is_delegate, send_invitation
+from backend.app.schemas.invitations import InvitationCreate, InvitationListItem, InvitationResponse
+from backend.app.services.invitation import PendingInvitationExists, is_delegate, list_invitations, send_invitation
 
 logger = logging.getLogger(__name__)
 
@@ -63,3 +63,18 @@ def post_invitation(invitation: InvitationCreate, db: Session = Depends(get_db),
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={"code": "email_not_sent", "message": "The Invitation email couldn't be sent, so nothing was saved. Try again"},
         )
+
+
+# the Owner's Invitations, newest first, each shown as pending, expired, accepted or cancelled
+@router.get(
+    "",
+    response_model=list[InvitationListItem],
+    status_code=200,
+    summary="List your Invitations",
+)
+def get_invitations(db: Session = Depends(get_db), user: CurrentUser = Depends(get_current_user)):
+    # always the caller's own Invitations for now, but can() still decides
+    if not can(user, "manage_delegations", user.id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    return list_invitations(db, user.id)

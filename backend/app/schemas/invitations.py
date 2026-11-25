@@ -8,6 +8,9 @@ from backend.app.services.email import AccessLevel
 # Invitation whose expires_at has passed
 InvitationStatus = Literal["pending", "accepted", "cancelled"]
 
+# the status the Owner sees in the list: the stored ones, plus expired for a pending Invitation whose 7 days are up
+ShownInvitationStatus = Literal["pending", "expired", "accepted", "cancelled"]
+
 # schema for POST /invitations: the email to invite, and the Access Level the Delegation would have
 class InvitationCreate(BaseModel):
     # strips surrounding whitespace and refuses values of the wrong type, like the Doctor Card schemas
@@ -24,17 +27,24 @@ class InvitationCreate(BaseModel):
     def lowercase(cls, value: str) -> str:
         return value.lower()
 
-# schema for the Invitation in responses. It has no token_hash field, so neither the token nor its hash
+# the fields every Invitation response has. There's no token_hash field, so neither the token nor its hash
 # can be returned, even by mistake
-class InvitationResponse(BaseModel):
+class InvitationResponseBase(BaseModel):
     id: int
     owner_id: UUID
     invited_email: str
     access_level: AccessLevel
-    status: InvitationStatus
     expires_at: datetime
     created_at: datetime
     accepted_at: datetime | None
     cancelled_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
+
+# schema for the Invitation POST /invitations answers with. Its status is the stored one: pending, for a new Invitation
+class InvitationResponse(InvitationResponseBase):
+    status: InvitationStatus
+
+# schema for each Invitation GET /invitations lists. Its status is the one the Owner sees, so it can be expired
+class InvitationListItem(InvitationResponseBase):
+    status: ShownInvitationStatus
