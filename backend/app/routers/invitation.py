@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from resend.exceptions import ResendError
 from sqlalchemy.orm import Session
@@ -6,6 +7,8 @@ from backend.app.authorization import can
 from backend.app.db import get_db
 from backend.app.schemas.invitations import InvitationCreate, InvitationResponse
 from backend.app.services.invitation import PendingInvitationExists, is_delegate, send_invitation
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/invitations",
@@ -48,7 +51,14 @@ def post_invitation(invitation: InvitationCreate, db: Session = Depends(get_db),
             detail={"code": "invitation_pending", "message": "You've already invited this email. Use Resend instead"},
         )
     # Resend refused the email or didn't answer, and send_invitation saved nothing
-    except ResendError:
+    except ResendError as error:
+        # so the server's log says why, like a bad API key, a timeout or a rate limit. Only Resend's own code, type
+        # and message go in, not the token, the link or the invited email, and %r keeps a message with line breaks
+        # on one line. No traceback, since Resend failed, not this code
+        logger.warning(
+            "Resend didn't take the Invitation email: code=%s type=%s message=%r",
+            error.code, error.error_type, error.message,
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={"code": "email_not_sent", "message": "The Invitation email couldn't be sent, so nothing was saved. Try again"},

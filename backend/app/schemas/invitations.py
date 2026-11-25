@@ -1,7 +1,12 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 from backend.app.services.email import AccessLevel
+
+# every Invitation status, the same values as the CHECK constraint on invitations. Expired isn't one: it's a pending
+# Invitation whose expires_at has passed
+InvitationStatus = Literal["pending", "accepted", "cancelled"]
 
 # schema for POST /invitations: the email to invite, and the Access Level the Delegation would have
 class InvitationCreate(BaseModel):
@@ -26,7 +31,7 @@ class InvitationResponse(BaseModel):
     owner_id: UUID
     invited_email: str
     access_level: AccessLevel
-    status: str
+    status: InvitationStatus
     expires_at: datetime
     created_at: datetime
     accepted_at: datetime | None

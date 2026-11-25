@@ -2,7 +2,6 @@ import hashlib
 import secrets
 from datetime import timedelta
 from uuid import UUID
-from resend.exceptions import ResendError
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -40,8 +39,9 @@ def is_delegate(db: Session, owner_id: UUID, email: str) -> bool:
 
 
 # saves the Invitation, logs it, emails the link, then commits (ADR 0007), so the Owner is told it was sent only
-# once Resend has taken the email. Raises PendingInvitationExists, or ResendError when the email fails, and either
-# way nothing is saved. Returns the saved Invitation, which holds the token's hash, never the token
+# once Resend has taken the email. Raises PendingInvitationExists, or whatever error the email failed with
+# (ResendError when Resend refuses it or doesn't answer), and either way nothing is saved. Returns the saved
+# Invitation, which holds the token's hash, never the token
 def send_invitation(db: Session, invitation_in: InvitationCreate, owner: CurrentUser) -> Invitation:
     # the raw token goes in the emailed link and is kept nowhere else. Only its hash is stored, so someone who
     # reads the invitations table still can't accept an Invitation
@@ -63,7 +63,9 @@ def send_invitation(db: Session, invitation_in: InvitationCreate, owner: Current
         db.flush()
     except IntegrityError as error:
         db.rollback()
-        if error.orig.diag.constraint_name == "index_invitations_pending_owner_email":
+        # only that unique index means a pending Invitation exists. Any other IntegrityError is re-raised as it is,
+        # even one whose driver error has no diag to read, rather than hidden behind an AttributeError
+        if getattr(getattr(error.orig, "diag", None), "constraint_name", None) == "index_invitations_pending_owner_email":
             raise PendingInvitationExists from error
         raise
 
@@ -83,9 +85,9 @@ def send_invitation(db: Session, invitation_in: InvitationCreate, owner: Current
     link = f"{FRONTEND_URL}/accept-invitation#token={token}"
     try:
         send_invitation_email(invitation_in.email, owner, invitation_in.access_level, link)
-    except ResendError:
-        # undoes the INSERT. The log entry was only added to the session (autoflush is off), so it never
-        # reached the database
+    except Exception:
+        # any failure, not just ResendError, undoes the INSERT, and the same error goes on to the route. The log
+        # entry was only added to the session (autoflush is off), so it never reached the database
         db.rollback()
         raise
 
