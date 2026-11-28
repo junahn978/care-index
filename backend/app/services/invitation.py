@@ -47,19 +47,42 @@ def is_delegate(db: Session, owner_id: UUID, email: str) -> bool:
     return db.scalar(query) is not None
 
 
+# a new random token and its SHA-256. The raw token goes in the emailed link and is kept nowhere else. Only its
+# hash is stored, so someone who reads the invitations table still can't accept an Invitation
+def new_token() -> tuple[str, str]:
+    token = secrets.token_urlsafe(32)
+    return token, hashlib.sha256(token.encode()).hexdigest()
+
+
+# emails the link with the raw token, then commits everything the session holds (ADR 0007), so the Owner is told
+# it was sent only once Resend has taken the email. Send and Resend both end here. Returns the Invitation as saved
+def email_then_commit(db: Session, invitation: Invitation, owner: CurrentUser, token: str) -> Invitation:
+    link = f"{FRONTEND_URL}/accept-invitation#token={token}"
+    try:
+        send_invitation_email(invitation.invited_email, owner, invitation.access_level, link)
+    except Exception:
+        # any failure, not just ResendError, undoes the INSERT or UPDATE already sent, and the same error goes on to
+        # the route. The log entry was only added to the session (autoflush is off), so it never reached the database
+        db.rollback()
+        raise
+
+    db.commit()
+    db.refresh(invitation)
+
+    return invitation
+
+
 # saves the Invitation, logs it, emails the link, then commits (ADR 0007), so the Owner is told it was sent only
 # once Resend has taken the email. Raises PendingInvitationExists, or whatever error the email failed with
 # (ResendError when Resend refuses it or doesn't answer), and either way nothing is saved. Returns the saved
 # Invitation, which holds the token's hash, never the token
 def send_invitation(db: Session, invitation_in: InvitationCreate, owner: CurrentUser) -> Invitation:
-    # the raw token goes in the emailed link and is kept nowhere else. Only its hash is stored, so someone who
-    # reads the invitations table still can't accept an Invitation
-    token = secrets.token_urlsafe(32)
+    token, token_hash = new_token()
     invitation = Invitation(
         owner_id=owner.id,
         invited_email=invitation_in.email,
         access_level=invitation_in.access_level,
-        token_hash=hashlib.sha256(token.encode()).hexdigest(),
+        token_hash=token_hash,
         # 7 days on from the database's now(), the clock expiry is checked against. The database fills in the
         # rest: status pending, created_at now(), and accepted_at and cancelled_at empty
         expires_at=func.now() + INVITATION_LIFETIME,
@@ -91,19 +114,52 @@ def send_invitation(db: Session, invitation_in: InvitationCreate, owner: Current
         },
     )
 
-    link = f"{FRONTEND_URL}/accept-invitation#token={token}"
-    try:
-        send_invitation_email(invitation_in.email, owner, invitation_in.access_level, link)
-    except Exception:
-        # any failure, not just ResendError, undoes the INSERT, and the same error goes on to the route. The log
-        # entry was only added to the session (autoflush is off), so it never reached the database
-        db.rollback()
-        raise
+    return email_then_commit(db, invitation, owner, token)
 
-    db.commit()
-    db.refresh(invitation)
 
-    return invitation
+# the Invitation with this id, or None if there's none, read without a lock, so it never waits on another request.
+# Only for deciding who may act on it, which is safe because an Invitation's owner_id never changes. Its status can,
+# so that's checked on the row get_invitation_for_update locks
+def get_invitation(db: Session, invitation_id: int) -> Invitation | None:
+    return db.get(Invitation, invitation_id)
+
+
+# the Invitation with this id, or None if there's none, locked until this request commits or rolls back
+# (SELECT ... FOR UPDATE). Anything else that changes an Invitation, like Cancel or Accept, must lock it the same
+# way, so it waits for this request and then sees what it saved, instead of acting on the old row. populate_existing
+# reads the row afresh even if the session already holds this Invitation, as it does after get_invitation
+def get_invitation_for_update(db: Session, invitation_id: int) -> Invitation | None:
+    return db.get(Invitation, invitation_id, with_for_update=True, populate_existing=True)
+
+
+# gives a pending Invitation, expired or not, a new token that works for 7 days from now, logs it, emails the new
+# link, then commits (ADR 0007). The new hash replaces the old one, so the old link stops working, but only once the email
+# has gone: if it fails, everything rolls back and the old link still works. Raises whatever error the email
+# failed with (ResendError when Resend refuses it or doesn't answer). invitation is the row the route locked and
+# checked
+def resend_invitation(db: Session, invitation: Invitation, owner: CurrentUser) -> Invitation:
+    token, token_hash = new_token()
+    invitation.token_hash = token_hash
+    # 7 days on from the database's now(), like a new Invitation. created_at stays: it's when the Invitation was
+    # first sent, so a Resend doesn't move it up the list
+    invitation.expires_at = func.now() + INVITATION_LIFETIME
+    # sends the UPDATE before the email, so a database error stops the Resend before any email goes out
+    db.flush()
+
+    # the same details as a Send, never the token: the log is permanent
+    log_action(
+        db,
+        owner,
+        "resend_invitation",
+        owner_id=invitation.owner_id,
+        details={
+            "invitation_id": invitation.id,
+            "invited_email": invitation.invited_email,
+            "access_level": invitation.access_level,
+        },
+    )
+
+    return email_then_commit(db, invitation, owner, token)
 
 
 # the Owner's Invitations, newest first, each with the status they see. All of them, with no paging: an Owner sends

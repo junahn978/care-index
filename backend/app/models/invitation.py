@@ -1,9 +1,13 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Identity, Index, String, Uuid, func, text
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 import uuid
 from backend.app.models.base import Base
+
+# every Access Level, the same values as the CHECK constraints on invitations and delegations. It's defined here, with
+# the model that stores it, so schemas and services import it from the model and the model never imports from them
+AccessLevel = Literal["view_only", "full_access"]
 
 # an Owner's offer of a Delegation to one email at one Access Level (ADR 0007).
 # Expired isn't stored: it's a pending Invitation whose expires_at has passed, checked against the database's clock
@@ -44,7 +48,7 @@ class Invitation(Base):
         nullable=False
     )
     invited_email: Mapped[str] = mapped_column(String(254), nullable=False)
-    access_level: Mapped[str] = mapped_column(String(20), nullable=False)
+    access_level: Mapped[AccessLevel] = mapped_column(String(20), nullable=False)
     # only the hash: the raw token is in the emailed link and nowhere else
     token_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, server_default=text("'pending'"))
