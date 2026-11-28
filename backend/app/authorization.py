@@ -3,7 +3,8 @@ from uuid import UUID
 from backend.app.auth import CurrentUser
 
 # the one check that decides who may do what with Doctor Cards: every card and Delegation route asks can(),
-# none decides on its own (ADR 0007). auth.py works out who the person is, this decides what they may do
+# none decides on its own (ADR 0007), except Accept: an Invitation's own token and email are what allow accepting it
+# (routers/invitation.py). auth.py works out who the person is, this decides what they may do
 
 # what a request wants to do with an Owner's Doctor Cards, in CONTEXT.md's words, plus manage_delegations
 # (ADR 0007's Manage Delegations: deciding who else reaches them, such as sending an Invitation).

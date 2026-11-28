@@ -2,13 +2,21 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from resend.exceptions import ResendError
 from sqlalchemy.orm import Session
-from backend.app.auth import CurrentUser, get_current_user
+from backend.app.auth import CurrentUser, get_current_user, get_invitee
 from backend.app.authorization import can
 from backend.app.db import get_db
 from backend.app.models.invitation import Invitation
-from backend.app.schemas.invitations import InvitationCreate, InvitationListItem, InvitationResponse
+from backend.app.schemas.invitations import (
+    InvitationAccept,
+    InvitationAcceptResponse,
+    InvitationCreate,
+    InvitationListItem,
+    InvitationResponse,
+)
 from backend.app.services.invitation import (
+    InvitationNotAcceptable,
     PendingInvitationExists,
+    accept_invitation,
     cancel_invitation,
     get_invitation,
     get_invitation_for_update,
@@ -188,3 +196,26 @@ def post_cancel_invitation(invitation_id: int, db: Session = Depends(get_db), us
     )
 
     return cancel_invitation(db, invitation, user)
+
+
+# the signed-in invitee accepts the Invitation in their emailed link, which gives them a Delegation to the Owner's
+# Doctor Cards. get_invitee signs them in without the Allowlist, since an invitee might not be a Member (ADR 0007).
+# There's no can(): what allows it is the Invitation itself, its token and email, not a rule about whose cards these
+# are. Whatever stops the Invitation being accepted gets the same 404, so the answer never tells which check failed
+@router.post(
+    "/accept",
+    response_model=InvitationAcceptResponse,
+    status_code=200,
+    summary="Accept an Invitation",
+)
+def post_accept_invitation(
+    acceptance: InvitationAccept,
+    db: Session = Depends(get_db),
+    invitee: CurrentUser = Depends(get_invitee),
+):
+    try:
+        return accept_invitation(db, acceptance.token, invitee)
+    # no pending Invitation has this token, it has expired, it's to another email, its Owner is Suspended, or the
+    # invitee is already their Delegate or is the Owner. accept_invitation saved nothing
+    except InvitationNotAcceptable:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid or expired invitation")

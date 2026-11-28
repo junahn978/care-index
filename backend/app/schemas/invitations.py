@@ -49,3 +49,19 @@ class InvitationResponse(InvitationResponseBase):
 # schema for each Invitation GET /invitations lists. Its status is the one the Owner sees, so it can be expired
 class InvitationListItem(InvitationResponseBase):
     status: ShownInvitationStatus
+
+# schema for POST /invitations/accept: the token from the emailed link
+class InvitationAccept(BaseModel):
+    # refuses values of the wrong type, like the other request schemas, and strips surrounding whitespace, which a
+    # token never has
+    model_config = ConfigDict(str_strip_whitespace=True, strict=True)
+
+    # any text: a made-up or cut-short token gets the same 404 "Invalid or expired invitation" as an expired one,
+    # which is what the person should read, rather than a 422
+    token: str
+
+# schema for what POST /invitations/accept answers with: whose Doctor Cards the new Delegation covers, and at which
+# Access Level, for the page that confirms it
+class InvitationAcceptResponse(BaseModel):
+    owner_email: str
+    access_level: AccessLevel
