@@ -41,8 +41,8 @@ class InvitationResponseBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-# schema for the Invitation that Send (POST /invitations) and Resend answer with. Its status is the stored one: pending,
-# after either
+# schema for the Invitation that Send (POST /invitations), Resend and Cancel answer with. Its status is the stored one:
+# pending after a Send or a Resend, cancelled after a Cancel
 class InvitationResponse(InvitationResponseBase):
     status: InvitationStatus
 

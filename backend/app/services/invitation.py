@@ -125,9 +125,10 @@ def get_invitation(db: Session, invitation_id: int) -> Invitation | None:
 
 
 # the Invitation with this id, or None if there's none, locked until this request commits or rolls back
-# (SELECT ... FOR UPDATE). Anything else that changes an Invitation, like Cancel or Accept, must lock it the same
-# way, so it waits for this request and then sees what it saved, instead of acting on the old row. populate_existing
-# reads the row afresh even if the session already holds this Invitation, as it does after get_invitation
+# (SELECT ... FOR UPDATE). Resend and Cancel lock it here. Anything else that changes an Invitation, like Accept, must
+# lock it the same way, so it waits for this request and then sees what it saved, instead of acting on the old row.
+# populate_existing reads the row afresh even if the session already holds this Invitation, as it does after
+# get_invitation
 def get_invitation_for_update(db: Session, invitation_id: int) -> Invitation | None:
     return db.get(Invitation, invitation_id, with_for_update=True, populate_existing=True)
 
@@ -160,6 +161,37 @@ def resend_invitation(db: Session, invitation: Invitation, owner: CurrentUser) -
     )
 
     return email_then_commit(db, invitation, owner, token)
+
+
+# cancels a pending Invitation, expired or not, logs it, then commits. No email goes out. Once cancelled it can't be
+# accepted (ADR 0007), since Accept must take only a pending Invitation, and the Owner can invite the same email again.
+# invitation is the row the route locked and checked. Returns the Invitation as saved
+def cancel_invitation(db: Session, invitation: Invitation, owner: CurrentUser) -> Invitation:
+    invitation.status = "cancelled"
+    # the database's now(), like the Invitation's other times
+    invitation.cancelled_at = func.now()
+    # sends the UPDATE now, before the log entry, as Send and Resend do. Left to the commit, SQLAlchemy would send the
+    # log entry's INSERT first
+    db.flush()
+
+    # the same details as a Send or a Resend, never the token's hash: the log is permanent
+    log_action(
+        db,
+        owner,
+        "cancel_invitation",
+        owner_id=invitation.owner_id,
+        details={
+            "invitation_id": invitation.id,
+            "invited_email": invitation.invited_email,
+            "access_level": invitation.access_level,
+        },
+    )
+
+    # one commit saves the change and its log entry, so both are saved or neither is
+    db.commit()
+    db.refresh(invitation)
+
+    return invitation
 
 
 # the Owner's Invitations, newest first, each with the status they see. All of them, with no paging: an Owner sends
