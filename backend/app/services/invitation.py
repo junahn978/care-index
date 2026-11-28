@@ -3,7 +3,7 @@ import secrets
 from collections.abc import Sequence
 from datetime import timedelta
 from uuid import UUID
-from sqlalchemy import RowMapping, and_, case, func, select
+from sqlalchemy import ColumnElement, RowMapping, and_, case, func, not_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from backend.app.auth import CurrentUser
@@ -11,18 +11,27 @@ from backend.app.config import FRONTEND_URL
 from backend.app.models.app_user import AppUser
 from backend.app.models.delegation import Delegation
 from backend.app.models.invitation import Invitation
-from backend.app.schemas.invitations import InvitationCreate
+from backend.app.schemas.invitations import InvitationAcceptResponse, InvitationCreate
 from backend.app.services.audit_log import log_action
 from backend.app.services.email import send_invitation_email
 
 # how long an Invitation's link works (ADR 0007). The email tells the invitee the same 7 days
 INVITATION_LIFETIME = timedelta(days=7)
 
-# the status the Owner sees. Expired isn't stored (ADR 0007): an Invitation works while it's under 7 days old, so a
-# pending one has expired once expires_at is the database's now() or earlier. The database's clock, since it set
-# expires_at. Accepted and cancelled Invitations keep their status, whatever expires_at says
+
+# whether an Invitation's 7 days are up: its link works while it's under 7 days old (ADR 0007), so it has expired once
+# expires_at is the database's now() or earlier. The database's clock, since it set expires_at. The list and Accept
+# both decide expiry here, so they draw the line in the same place: at the same now(), an Invitation the list shows as
+# expired is one Accept refuses. now() is when the request's transaction began, so two requests a moment apart can
+# still land on either side of it
+def is_expired() -> ColumnElement[bool]:
+    return Invitation.expires_at <= func.now()
+
+
+# the status the Owner sees. Expired isn't stored (ADR 0007): it's a pending Invitation whose 7 days are up.
+# Accepted and cancelled Invitations keep their status, whatever expires_at says
 shown_status = case(
-    (and_(Invitation.status == "pending", Invitation.expires_at <= func.now()), "expired"),
+    (and_(Invitation.status == "pending", is_expired()), "expired"),
     else_=Invitation.status,
 )
 
@@ -30,6 +39,19 @@ shown_status = case(
 # the Owner already has a pending Invitation to this email, expired or not, so they should Resend that one
 class PendingInvitationExists(Exception):
     pass
+
+
+# the Invitation can't be accepted: no pending Invitation has this token, or it has expired, or it's to another email,
+# or its Owner is Suspended, or the invitee already holds an active Delegation from that Owner, or is that Owner. The
+# route answers all of them the same way (ADR 0007), so the answer never tells which it was
+class InvitationNotAcceptable(Exception):
+    pass
+
+
+# the name of the constraint an IntegrityError broke, or None when it can't tell, like when the driver error has no
+# diag to read. Callers compare it with the constraints they expect and re-raise anything else as it is
+def broken_constraint(error: IntegrityError) -> str | None:
+    return getattr(getattr(error.orig, "diag", None), "constraint_name", None)
 
 
 # whether email (lowercase) belongs to someone who holds an active Delegation from this Owner
@@ -47,11 +69,17 @@ def is_delegate(db: Session, owner_id: UUID, email: str) -> bool:
     return db.scalar(query) is not None
 
 
-# a new random token and its SHA-256. The raw token goes in the emailed link and is kept nowhere else. Only its
-# hash is stored, so someone who reads the invitations table still can't accept an Invitation
+# a raw token's SHA-256, the only form of it that's stored. Send and Resend store it, and Accept finds the Invitation
+# by it, so all three hash the same way
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+# a new random token and its hash. The raw token goes in the emailed link and is kept nowhere else. Only its hash
+# is stored, so someone who reads the invitations table still can't accept an Invitation
 def new_token() -> tuple[str, str]:
     token = secrets.token_urlsafe(32)
-    return token, hashlib.sha256(token.encode()).hexdigest()
+    return token, hash_token(token)
 
 
 # emails the link with the raw token, then commits everything the session holds (ADR 0007), so the Owner is told
@@ -95,9 +123,8 @@ def send_invitation(db: Session, invitation_in: InvitationCreate, owner: Current
         db.flush()
     except IntegrityError as error:
         db.rollback()
-        # only that unique index means a pending Invitation exists. Any other IntegrityError is re-raised as it is,
-        # even one whose driver error has no diag to read, rather than hidden behind an AttributeError
-        if getattr(getattr(error.orig, "diag", None), "constraint_name", None) == "index_invitations_pending_owner_email":
+        # only that unique index means a pending Invitation exists. Any other IntegrityError is re-raised as it is
+        if broken_constraint(error) == "index_invitations_pending_owner_email":
             raise PendingInvitationExists from error
         raise
 
@@ -125,10 +152,10 @@ def get_invitation(db: Session, invitation_id: int) -> Invitation | None:
 
 
 # the Invitation with this id, or None if there's none, locked until this request commits or rolls back
-# (SELECT ... FOR UPDATE). Resend and Cancel lock it here. Anything else that changes an Invitation, like Accept, must
-# lock it the same way, so it waits for this request and then sees what it saved, instead of acting on the old row.
-# populate_existing reads the row afresh even if the session already holds this Invitation, as it does after
-# get_invitation
+# (SELECT ... FOR UPDATE). Resend and Cancel lock it here, and Accept's UPDATE locks the same row, so whichever comes
+# second waits until the first commits or rolls back, then sees the row as the first left it, instead of acting on the
+# old one. Anything else that changes an Invitation must lock it too. populate_existing reads the row afresh even if
+# the session already holds this Invitation, as it does after get_invitation
 def get_invitation_for_update(db: Session, invitation_id: int) -> Invitation | None:
     return db.get(Invitation, invitation_id, with_for_update=True, populate_existing=True)
 
@@ -192,6 +219,81 @@ def cancel_invitation(db: Session, invitation: Invitation, owner: CurrentUser) -
     db.refresh(invitation)
 
     return invitation
+
+
+# the signed-in invitee accepts the Invitation this token belongs to: it's marked accepted, their Delegation is created
+# and logged, and one commit saves all three (ADR 0007). Raises InvitationNotAcceptable, and then nothing is saved.
+# Returns the Owner's email and the Access Level, for the page that confirms it
+def accept_invitation(db: Session, token: str, invitee: CurrentUser) -> InvitationAcceptResponse:
+    # one UPDATE finds the Invitation and marks it accepted, but only if everything matches: the token, pending, not
+    # expired, and the invitee's email. Postgres locks the row it updates. If a Resend, a Cancel or another Accept
+    # holds it, the UPDATE waits until that commits or rolls back, then checks all four against the row as it is then.
+    # So a resent or cancelled link stops working at once, two Accepts of one link can't both get through, and a
+    # Resend whose email failed, and so rolled back, leaves the old link working
+    accepted = db.execute(
+        update(Invitation)
+        .where(
+            Invitation.token_hash == hash_token(token),
+            Invitation.status == "pending",
+            not_(is_expired()),
+            Invitation.invited_email == invitee.email,
+        )
+        .values(status="accepted", accepted_at=func.now())
+        .returning(Invitation.id, Invitation.owner_id, Invitation.invited_email, Invitation.access_level)
+    ).one_or_none()
+    if accepted is None:
+        db.rollback()
+        raise InvitationNotAcceptable
+
+    # nor from a Suspended Owner. Rolling back undoes the UPDATE, so the Invitation is still pending. A plain read is
+    # enough: if an Admin suspends the Owner just before this commits, it's as if the Accept had come first, and a
+    # Suspended Owner's Delegates can't reach their cards anyway, since access is decided on every request (ADR 0007)
+    owner = db.get(AppUser, accepted.owner_id)
+    if owner is None or owner.is_suspended:
+        db.rollback()
+        raise InvitationNotAcceptable
+    # read now, since the commit expires it
+    owner_email = owner.email
+
+    delegation = Delegation(
+        owner_id=accepted.owner_id,
+        delegate_id=invitee.id,
+        invitation_id=accepted.id,
+        access_level=accepted.access_level,
+    )
+    db.add(delegation)
+    try:
+        # sends the INSERT so Postgres assigns the id the log entry needs. The database refuses a second active
+        # Delegation from this Owner to the invitee (ADR 0007), and one to the Owner themselves
+        db.flush()
+    except IntegrityError as error:
+        db.rollback()
+        if broken_constraint(error) in (
+            "index_delegations_active_owner_delegate",
+            "check_delegations_owner_is_not_delegate",
+        ):
+            raise InvitationNotAcceptable from error
+        raise
+
+    # the invitee is the actor, since they accepted it. The same details as a Send, plus the Delegation it created,
+    # never the token's hash: the log is permanent
+    log_action(
+        db,
+        invitee,
+        "accept_invitation",
+        owner_id=accepted.owner_id,
+        details={
+            "invitation_id": accepted.id,
+            "invited_email": accepted.invited_email,
+            "access_level": accepted.access_level,
+            "delegation_id": delegation.id,
+        },
+    )
+
+    # one commit saves the accepted Invitation, the Delegation and the log entry, so all three are saved or none is
+    db.commit()
+
+    return InvitationAcceptResponse(owner_email=owner_email, access_level=accepted.access_level)
 
 
 # the Owner's Invitations, newest first, each with the status they see. All of them, with no paging: an Owner sends

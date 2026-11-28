@@ -54,21 +54,14 @@ def full_name_from(payload: dict) -> str | None:
     tidied = " ".join(full_name.split()) if isinstance(full_name, str) else ""
     return tidied or None
 
-def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)) -> CurrentUser:
-    payload = verify_access_token(creds.credentials)
+# the token's email, lowercased like every email the app stores, or "" when it has none. The token's, not
+# app_users.email: the token is what Supabase just vouched for
+def email_from(payload: dict) -> str:
+    return (payload.get("email") or "").lower()
 
-    # the token's email, not app_users.email: the token is what Supabase just vouched for.
-    # Looked up on every request and never stored, so removing an email from allowed_emails takes effect on the next request
-    email = (payload.get("email") or "").lower()
-    is_allowlisted = is_email_allowed(db, email)
-
-    # a valid token isn't enough, the email it was issued to must be in the allowed_emails table.
-    # Every route gets the user through here, so this protects all of them.
-    # 403, not 401: the user is signed in, just not allowed, and the frontend shows "access denied" for it.
-    # Both 403s here carry a stable code, so the frontend can tell them apart without matching the message text
-    if not is_allowlisted:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, {"code": "not_on_allowlist", "message": "Not authorized"})
-
+# the end of both sign-in checks, once one has let the person through: their app_users row, then the Suspended
+# refusal. Both checks end here, so they can't drift apart on either. email is email_from(payload)
+def signed_in_user(db: Session, payload: dict, email: str, is_allowlisted: bool) -> CurrentUser:
     # FastAPI never sees the sign-in itself, so the first request after it creates the app_users row.
     # get_db is cached per request, so this is the same session the route gets
     user_id = UUID(payload["sub"])
@@ -86,3 +79,35 @@ def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: 
         is_suspended=app_user.is_suspended,
         is_allowlisted=is_allowlisted,
     )
+
+def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)) -> CurrentUser:
+    payload = verify_access_token(creds.credentials)
+
+    # looked up on every request and never stored, so removing an email from allowed_emails takes effect on the next request
+    email = email_from(payload)
+    is_allowlisted = is_email_allowed(db, email)
+
+    # a valid token isn't enough, the email it was issued to must be in the allowed_emails table.
+    # Every route except Accept gets the user through here, so this protects all of them.
+    # It comes before the app_users row is created, so someone it turns away never gets one here.
+    # 403, not 401: the user is signed in, just not allowed, and the frontend shows "access denied" for it.
+    # Like the Suspended 403, it carries a stable code, so the frontend can tell them apart without matching the text
+    if not is_allowlisted:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, {"code": "not_on_allowlist", "message": "Not authorized"})
+
+    return signed_in_user(db, payload, email, is_allowlisted)
+
+# the sign-in check for POST /invitations/accept, and nothing else: get_current_user without the Allowlist. An
+# Invitation is how someone who isn't a Member becomes a Delegate (ADR 0007), so the invitee might not be on it.
+# Any other route that signed people in here would let in everyone the Allowlist keeps out
+def get_invitee(creds: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)) -> CurrentUser:
+    payload = verify_access_token(creds.credentials)
+    email = email_from(payload)
+
+    # Accept matches the Invitation by email, and the app_users row needs one. Without the Allowlist, nothing else
+    # turns away a token that has none, like an anonymous sign-in's, so here it counts as no valid sign-in
+    if not email:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
+
+    # looked up only so CurrentUser says truthfully whether they're a Member. Nobody is turned away for it
+    return signed_in_user(db, payload, email, is_email_allowed(db, email))
