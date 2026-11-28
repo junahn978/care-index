@@ -117,10 +117,17 @@ def send_invitation(db: Session, invitation_in: InvitationCreate, owner: Current
     return email_then_commit(db, invitation, owner, token)
 
 
+# the Invitation with this id, or None if there's none, read without a lock, so it never waits on another request.
+# Only for deciding who may act on it, which is safe because an Invitation's owner_id never changes. Its status can,
+# so that's checked on the row get_invitation_for_update locks
+def get_invitation(db: Session, invitation_id: int) -> Invitation | None:
+    return db.get(Invitation, invitation_id)
+
+
 # the Invitation with this id, or None if there's none, locked until this request commits or rolls back
 # (SELECT ... FOR UPDATE). Anything else that changes an Invitation, like Cancel or Accept, must lock it the same
 # way, so it waits for this request and then sees what it saved, instead of acting on the old row. populate_existing
-# reads the row afresh even if the session already holds this Invitation
+# reads the row afresh even if the session already holds this Invitation, as it does after get_invitation
 def get_invitation_for_update(db: Session, invitation_id: int) -> Invitation | None:
     return db.get(Invitation, invitation_id, with_for_update=True, populate_existing=True)
 

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
-from backend.app.services.email import AccessLevel
+from backend.app.models.invitation import AccessLevel
 
 # every Invitation status, the same values as the CHECK constraint on invitations. Expired isn't one: it's a pending
 # Invitation whose expires_at has passed

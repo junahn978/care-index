@@ -8,6 +8,7 @@ from backend.app.db import get_db
 from backend.app.schemas.invitations import InvitationCreate, InvitationListItem, InvitationResponse
 from backend.app.services.invitation import (
     PendingInvitationExists,
+    get_invitation,
     get_invitation_for_update,
     is_delegate,
     list_invitations,
@@ -23,18 +24,21 @@ router = APIRouter(
 )
 
 
-# the 502 for when Resend refused the Invitation email or didn't answer, so nothing was saved. First the server's log
-# says why, like a bad API key, a timeout or a rate limit. Only Resend's own code, type and message go in, not the
-# token, the link or the invited email, and %r keeps a message with line breaks on one line. No traceback, since
-# Resend failed, not this code
-def email_not_sent(error: ResendError) -> HTTPException:
+# the 502 for when Resend refused the Invitation email or didn't answer, so nothing was saved or changed. message is
+# what the Owner reads: Send's by default, and Resend passes its own. First the server's log says why, like a bad API
+# key, a timeout or a rate limit. Only Resend's own code, type and message go in, not the token, the link or the
+# invited email, and %r keeps a message with line breaks on one line. No traceback, since Resend failed, not this code
+def email_not_sent(
+    error: ResendError,
+    message: str = "The Invitation email couldn't be sent, so nothing was saved. Try again",
+) -> HTTPException:
     logger.warning(
         "Resend didn't take the Invitation email: code=%s type=%s message=%r",
         error.code, error.error_type, error.message,
     )
     return HTTPException(
         status_code=status.HTTP_502_BAD_GATEWAY,
-        detail={"code": "email_not_sent", "message": "The Invitation email couldn't be sent, so nothing was saved. Try again"},
+        detail={"code": "email_not_sent", "message": message},
     )
 
 
@@ -101,14 +105,22 @@ def get_invitations(db: Session = Depends(get_db), user: CurrentUser = Depends(g
     summary="Resend an Invitation",
 )
 def post_resend_invitation(invitation_id: int, db: Session = Depends(get_db), user: CurrentUser = Depends(get_current_user)):
-    # locked until this request ends, so the checks below still hold when it saves
-    invitation = get_invitation_for_update(db, invitation_id)
+    # an unlocked read first, so an unauthorized caller never locks or waits on someone else's row
+    invitation = get_invitation(db, invitation_id)
 
     # someone else's Invitation gets the same answer as one that doesn't exist, so an id reveals nothing
     if invitation is None or not can(user, "manage_delegations", invitation.owner_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
-    # only a pending Invitation can be resent, expired or not
+    # authorized, so now lock the row until this request ends and read it afresh: populate_existing overwrites what
+    # the unlocked read loaded
+    invitation = get_invitation_for_update(db, invitation_id)
+    # gone in between, like when its Owner's account was deleted
+    if invitation is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    # the status is checked only after the lock, so it's the current one and can't change before this request ends.
+    # Only a pending Invitation can be resent, expired or not
     if invitation.status == "accepted":
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -131,4 +143,4 @@ def post_resend_invitation(invitation_id: int, db: Session = Depends(get_db), us
         return resend_invitation(db, invitation, user)
     # Resend refused the email or didn't answer, and resend_invitation changed nothing, so the old link still works
     except ResendError as error:
-        raise email_not_sent(error)
+        raise email_not_sent(error, "The Invitation email couldn't be resent, so nothing was changed. Try again")

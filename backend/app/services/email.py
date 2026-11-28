@@ -1,11 +1,8 @@
 import html
-from typing import Literal
 import resend
 from backend.app.auth import CurrentUser
 from backend.app.config import RESEND_API_KEY
-
-# every Access Level, the same values as the CHECK constraints on invitations and delegations
-AccessLevel = Literal["view_only", "full_access"]
+from backend.app.models.invitation import AccessLevel
 
 # Invitations come from this address (ADR 0007), on the domain verified in Resend
 SENDER = "Care-Index <delegations@mail.careindexapp.com>"
