@@ -1,8 +1,9 @@
 import hashlib
 import secrets
+from collections.abc import Sequence
 from datetime import timedelta
 from uuid import UUID
-from sqlalchemy import func, select
+from sqlalchemy import RowMapping, and_, case, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from backend.app.auth import CurrentUser
@@ -16,6 +17,14 @@ from backend.app.services.email import send_invitation_email
 
 # how long an Invitation's link works (ADR 0007). The email tells the invitee the same 7 days
 INVITATION_LIFETIME = timedelta(days=7)
+
+# the status the Owner sees. Expired isn't stored (ADR 0007): an Invitation works while it's under 7 days old, so a
+# pending one has expired once expires_at is the database's now() or earlier. The database's clock, since it set
+# expires_at. Accepted and cancelled Invitations keep their status, whatever expires_at says
+shown_status = case(
+    (and_(Invitation.status == "pending", Invitation.expires_at <= func.now()), "expired"),
+    else_=Invitation.status,
+)
 
 
 # the Owner already has a pending Invitation to this email, expired or not, so they should Resend that one
@@ -95,3 +104,27 @@ def send_invitation(db: Session, invitation_in: InvitationCreate, owner: Current
     db.refresh(invitation)
 
     return invitation
+
+
+# the Owner's Invitations, newest first, each with the status they see. All of them, with no paging: an Owner sends
+# a handful. Nothing is logged, since the Audit Log records Invitation changes (ADR 0007) and reading isn't one
+def list_invitations(db: Session, owner_id: UUID) -> Sequence[RowMapping]:
+    query = (
+        # exactly the fields the list shows, with status as the Owner sees it. token_hash isn't selected, so it
+        # never even leaves the database
+        select(
+            Invitation.id,
+            Invitation.owner_id,
+            Invitation.invited_email,
+            Invitation.access_level,
+            shown_status.label("status"),
+            Invitation.expires_at,
+            Invitation.created_at,
+            Invitation.accepted_at,
+            Invitation.cancelled_at,
+        )
+        .where(Invitation.owner_id == owner_id)
+        # newest first. Two Invitations can share a created_at (a transaction has one now()), so the id breaks the tie
+        .order_by(Invitation.created_at.desc(), Invitation.id.desc())
+    )
+    return db.execute(query).mappings().all()
